@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { DataSource } from 'typeorm';
-import { AppointmentStatus } from '@booking/shared';
+import { addMinutes, AppointmentStatus, localToUtc, utcToLocal } from '@booking/shared';
 import {
   Appointment,
   Customer,
@@ -155,6 +155,25 @@ describe('database schema (e2e)', () => {
     });
     await ds.getRepository(Appointment).delete({ id: appointmentId });
     expect(await ds.getRepository(ReminderJob).countBy({ appointmentId })).toBe(0);
+  });
+
+  it('round-trips instants unchanged whatever the process timezone is (BS-24)', async () => {
+    const originalTz = process.env.TZ;
+    try {
+      process.env.TZ = 'America/New_York';
+      const startAt = localToUtc('2030-01-01', '15:00', 'Asia/Ho_Chi_Minh');
+      const { identifiers } = await appointment({ startAt, endAt: addMinutes(startAt, 60) });
+      const saved = await ds
+        .getRepository(Appointment)
+        .findOneByOrFail({ id: identifiers[0].id as string });
+      expect(saved.startAt.toISOString()).toBe('2030-01-01T08:00:00.000Z');
+      expect(utcToLocal(saved.startAt, salon.timezone).time).toBe('15:00');
+
+      const [{ tz }] = await ds.query(`SELECT current_setting('TimeZone') AS tz`);
+      expect(tz).toBe('UTC');
+    } finally {
+      process.env.TZ = originalTz;
+    }
   });
 
   it('seeds the demo salon idempotently', async () => {

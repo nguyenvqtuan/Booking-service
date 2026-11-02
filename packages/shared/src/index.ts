@@ -2,6 +2,7 @@ export * from './auth.js';
 export * from './enums.js';
 export * from './error-codes.js';
 export * from './locale.js';
+export * from './time.js';
 export * from './working-hours.js';
 
 export const DEFAULT_TIMEZONE = 'Asia/Ho_Chi_Minh';
