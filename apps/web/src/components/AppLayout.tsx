@@ -20,6 +20,12 @@ export function AppLayout() {
           </button>
         </div>
       </header>
+      <nav className="app-nav" aria-label={t('appName')}>
+        <NavLink to="/" end>
+          {t('nav.overview')}
+        </NavLink>
+        <NavLink to="/services">{t('nav.services')}</NavLink>
+      </nav>
       <main className="container">
         <Outlet />
       </main>

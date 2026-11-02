@@ -15,6 +15,7 @@ export const ErrorCode = {
   AuthEmailTaken: 'AUTH_EMAIL_TAKEN',
   AuthInvalidRefreshToken: 'AUTH_INVALID_REFRESH_TOKEN',
   AuthInvalidResetToken: 'AUTH_INVALID_RESET_TOKEN',
+  ServiceInUse: 'SERVICE_IN_USE',
 } as const;
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
