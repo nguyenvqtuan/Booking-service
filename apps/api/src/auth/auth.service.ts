@@ -17,6 +17,7 @@ import {
   type UpdateProfileInput,
 } from '@booking/shared';
 import { AppException } from '../common/app.exception.js';
+import { isPgError, PgErrorCode } from '../common/pg-errors.js';
 import { slugify } from '../common/slugify.js';
 import { PasswordResetToken, ReminderSetting, Salon, User } from '../database/entities/index.js';
 import { MailService } from '../mail/mail.service.js';
@@ -45,7 +46,26 @@ export class AuthService {
   async register(input: RegisterInput): Promise<AuthResult> {
     const passwordHash = await bcrypt.hash(input.password, this.bcryptRounds());
 
-    const user = await this.dataSource.transaction(async (em) => {
+    // Two concurrent sign-ups can pick the same free slug; retry so the next one picks "-2".
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await this.authenticate(await this.createOwner(input, passwordHash));
+      } catch (err) {
+        if (isPgError(err, PgErrorCode.UniqueViolation, 'UQ_users_email')) {
+          throw new AppException(
+            HttpStatus.CONFLICT,
+            ErrorCode.AuthEmailTaken,
+            'Email already registered',
+          );
+        }
+        if (attempt < 5 && isPgError(err, PgErrorCode.UniqueViolation, 'UQ_salons_slug')) continue;
+        throw err;
+      }
+    }
+  }
+
+  private createOwner(input: RegisterInput, passwordHash: string): Promise<User> {
+    return this.dataSource.transaction(async (em) => {
       if (await em.exists(User, { where: { email: input.email } })) {
         throw new AppException(
           HttpStatus.CONFLICT,
@@ -75,8 +95,6 @@ export class AuthService {
       created.salon = salon;
       return created;
     });
-
-    return this.authenticate(user);
   }
 
   async login(input: LoginInput): Promise<AuthResult> {

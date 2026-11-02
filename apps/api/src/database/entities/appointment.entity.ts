@@ -48,14 +48,14 @@ export class Appointment {
   @Column({ name: 'customer_id', type: 'uuid' })
   customerId: string;
 
-  @ManyToOne(() => Customer, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Customer, { onDelete: 'NO ACTION' })
   @JoinColumn({ name: 'customer_id', foreignKeyConstraintName: 'FK_appointments_customer' })
   customer: Relation<Customer>;
 
   @Column({ name: 'staff_id', type: 'uuid' })
   staffId: string;
 
-  @ManyToOne(() => Staff, { onDelete: 'RESTRICT' })
+  @ManyToOne(() => Staff, { onDelete: 'NO ACTION' })
   @JoinColumn({ name: 'staff_id', foreignKeyConstraintName: 'FK_appointments_staff' })
   staff: Relation<Staff>;
 
@@ -63,8 +63,11 @@ export class Appointment {
   @Column({ name: 'service_id', type: 'uuid' })
   serviceId: string;
 
-  /** RESTRICT: a service that has appointments cannot be hard-deleted (BS-18). */
-  @ManyToOne(() => Service, { onDelete: 'RESTRICT' })
+  /**
+   * NO ACTION (checked at statement end, unlike RESTRICT): a service with appointments cannot be
+   * deleted on its own, yet deleting the whole salon still cascades cleanly (BS-18).
+   */
+  @ManyToOne(() => Service, { onDelete: 'NO ACTION' })
   @JoinColumn({ name: 'service_id', foreignKeyConstraintName: 'FK_appointments_service' })
   service: Relation<Service>;
 
