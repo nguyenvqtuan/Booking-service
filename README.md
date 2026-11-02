@@ -40,6 +40,20 @@ pnpm dev                    # web :5173 + api :3000 (+ shared watch)
 | `pnpm typecheck` | Kiểm tra kiểu cho mọi package        |
 | `pnpm test`      | Unit test mọi package                |
 
+## Database & migration (apps/api)
+
+TypeORM với `synchronize: false` — mọi thay đổi schema đi qua migration trong `apps/api/src/database/migrations`.
+
+```bash
+pnpm --filter @booking/api migration:run       # chạy migration còn thiếu
+pnpm --filter @booking/api migration:revert    # lùi 1 migration
+pnpm --filter @booking/api migration:show      # xem trạng thái
+pnpm --filter @booking/api migration:generate src/database/migrations/<Ten>   # sinh từ entity
+pnpm --filter @booking/api test:e2e            # e2e (cần DB đang chạy)
+```
+
+Health check: `GET /health` → 200 khi DB sống, 503 khi mất kết nối.
+
 Pre-commit hook (Husky + lint-staged) chạy ESLint và Prettier trên file được stage; commit vi phạm lint sẽ bị chặn.
 
 ## Quy ước
