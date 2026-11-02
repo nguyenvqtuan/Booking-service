@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import request from 'supertest';
-import { In } from 'typeorm';
-import { Salon } from '../../src/database/entities/index.js';
+import { deleteSalonData } from '../../src/salons/salon-deletion.service.js';
 import type { TestApp } from './test-app.js';
 
 export interface TestOwner {
@@ -45,8 +44,6 @@ export class OwnerFactory {
   }
 
   async cleanup(): Promise<void> {
-    if (this.salonIds.length) {
-      await this.t.dataSource.getRepository(Salon).delete({ id: In(this.salonIds) });
-    }
+    for (const id of this.salonIds) await deleteSalonData(this.t.dataSource.manager, id);
   }
 }

@@ -1,17 +1,5 @@
-import {
-  Check,
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  type Relation,
-} from 'typeorm';
+import { Check, Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 import { MessageChannel, MessageLogStatus } from '@booking/shared';
-import { ReminderJob } from './reminder-job.entity.js';
-import { Salon } from './salon.entity.js';
 import { sqlIn } from './sql-helpers.js';
 
 /** One row per send attempt (BS-32). */
@@ -23,20 +11,14 @@ export class MessageLog {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  /** Implicit relation to salons.id (no FK, BS-70). */
   @Column({ name: 'salon_id', type: 'uuid' })
   salonId: string;
 
-  @ManyToOne(() => Salon, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'salon_id', foreignKeyConstraintName: 'FK_message_logs_salon' })
-  salon: Relation<Salon>;
-
+  /** Implicit relation to reminder_jobs.id (no FK, BS-70). */
   @Index('IDX_message_logs_reminder_job_id')
   @Column({ name: 'reminder_job_id', type: 'uuid', nullable: true })
   reminderJobId: string | null;
-
-  @ManyToOne(() => ReminderJob, { onDelete: 'SET NULL', nullable: true })
-  @JoinColumn({ name: 'reminder_job_id', foreignKeyConstraintName: 'FK_message_logs_reminder_job' })
-  reminderJob: Relation<ReminderJob> | null;
 
   @Column({ type: 'varchar', length: 10 })
   channel: MessageChannel;

@@ -12,11 +12,12 @@ import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { InjectRepository, TypeOrmModule } from '@nestjs/typeorm';
 import request from 'supertest';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { AppModule } from '../src/app.module.js';
 import { configureApp } from '../src/common/configure-app.js';
 import { Salon, Staff } from '../src/database/entities/index.js';
 import { CurrentSalon, findOwnedOrFail } from '../src/tenancy/index.js';
+import { deleteSalonData } from '../src/salons/salon-deletion.service.js';
 import { auditRouteTenancy } from '../src/tenancy/route-tenancy-audit.js';
 
 /** Minimal tenant-scoped controller used to prove the isolation mechanics end to end. */
@@ -86,7 +87,7 @@ describe('multi-tenant isolation (e2e)', () => {
     });
 
     afterAll(async () => {
-      await ds?.getRepository(Salon).delete({ id: In([salonA.id, salonB.id]) });
+      if (ds) for (const id of [salonA.id, salonB.id]) await deleteSalonData(ds.manager, id);
       await app?.close();
     });
 

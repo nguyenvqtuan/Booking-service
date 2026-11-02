@@ -5,17 +5,10 @@ import {
   Entity,
   Exclusion,
   Index,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
-  type Relation,
   UpdateDateColumn,
 } from 'typeorm';
 import { ACTIVE_APPOINTMENT_STATUSES, AppointmentSource, AppointmentStatus } from '@booking/shared';
-import { Customer } from './customer.entity.js';
-import { Salon } from './salon.entity.js';
-import { Service } from './service.entity.js';
-import { Staff } from './staff.entity.js';
 import { sqlIn } from './sql-helpers.js';
 
 /**
@@ -37,39 +30,23 @@ export class Appointment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  /** Implicit relation to salons.id (no FK, BS-70). */
   @Column({ name: 'salon_id', type: 'uuid' })
   salonId: string;
 
-  @ManyToOne(() => Salon, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'salon_id', foreignKeyConstraintName: 'FK_appointments_salon' })
-  salon: Relation<Salon>;
-
+  /** Implicit relation to customers.id (no FK, BS-70). */
   @Index('IDX_appointments_customer_id')
   @Column({ name: 'customer_id', type: 'uuid' })
   customerId: string;
 
-  @ManyToOne(() => Customer, { onDelete: 'NO ACTION' })
-  @JoinColumn({ name: 'customer_id', foreignKeyConstraintName: 'FK_appointments_customer' })
-  customer: Relation<Customer>;
-
+  /** Implicit relation to staff.id (no FK, BS-70). */
   @Column({ name: 'staff_id', type: 'uuid' })
   staffId: string;
 
-  @ManyToOne(() => Staff, { onDelete: 'NO ACTION' })
-  @JoinColumn({ name: 'staff_id', foreignKeyConstraintName: 'FK_appointments_staff' })
-  staff: Relation<Staff>;
-
+  /** Implicit relation to services.id (no FK, BS-70). */
   @Index('IDX_appointments_service_id')
   @Column({ name: 'service_id', type: 'uuid' })
   serviceId: string;
-
-  /**
-   * NO ACTION (checked at statement end, unlike RESTRICT): a service with appointments cannot be
-   * deleted on its own, yet deleting the whole salon still cascades cleanly (BS-18).
-   */
-  @ManyToOne(() => Service, { onDelete: 'NO ACTION' })
-  @JoinColumn({ name: 'service_id', foreignKeyConstraintName: 'FK_appointments_service' })
-  service: Relation<Service>;
 
   @Column({ name: 'start_at', type: 'timestamptz' })
   startAt: Date;

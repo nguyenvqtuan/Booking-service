@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import {
   type CustomerDetailDto,
   type CustomerDto,
+  type CustomerHistoryItem,
   type CustomerInputParsed,
   type CustomerUpdateParsed,
   ErrorCode,
@@ -12,7 +13,7 @@ import {
 } from '@booking/shared';
 import { AppException } from '../common/app.exception.js';
 import { isPgError, PgErrorCode } from '../common/pg-errors.js';
-import { Appointment, Customer } from '../database/entities/index.js';
+import { Appointment, Customer, Service, Staff } from '../database/entities/index.js';
 import { findOwnedOrFail } from '../tenancy/index.js';
 
 const HISTORY_LIMIT = 20;
@@ -74,21 +75,29 @@ export class CustomersService {
 
   async get(salonId: string, id: string): Promise<CustomerDetailDto> {
     const customer = await findOwnedOrFail(this.customers, id, salonId);
-    const history = await this.appointments.find({
-      where: { salonId, customerId: customer.id },
-      relations: { service: true, staff: true },
-      order: { startAt: 'DESC' },
-      take: HISTORY_LIMIT,
-    });
+    // Implicit relations (BS-70): join services/staff by id, scoped to the same salon.
+    const history = await this.appointments
+      .createQueryBuilder('a')
+      .innerJoin(Service, 'sv', 'sv.id = a.service_id AND sv.salon_id = a.salon_id')
+      .innerJoin(Staff, 'st', 'st.id = a.staff_id AND st.salon_id = a.salon_id')
+      .select(['a.id AS id', 'a.start_at AS "startAt"', 'a.status AS status'])
+      .addSelect(['sv.name AS "serviceName"', 'st.name AS "staffName"'])
+      .where('a.salon_id = :salonId AND a.customer_id = :customerId', {
+        salonId,
+        customerId: customer.id,
+      })
+      .orderBy('a.start_at', 'DESC')
+      .limit(HISTORY_LIMIT)
+      .getRawMany<{
+        id: string;
+        startAt: Date;
+        status: CustomerHistoryItem['status'];
+        serviceName: string;
+        staffName: string;
+      }>();
     return {
       ...toDto(customer),
-      history: history.map((a) => ({
-        id: a.id,
-        startAt: a.startAt.toISOString(),
-        status: a.status,
-        serviceName: a.service.name,
-        staffName: a.staff.name,
-      })),
+      history: history.map((h) => ({ ...h, startAt: new Date(h.startAt).toISOString() })),
     };
   }
 

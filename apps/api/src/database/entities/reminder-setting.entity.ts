@@ -1,23 +1,11 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryColumn,
-  type Relation,
-  UpdateDateColumn,
-} from 'typeorm';
-import { Salon } from './salon.entity.js';
+import { Column, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
 /** Per-salon reminder settings (1:1 with salon). */
 @Entity('reminder_settings')
 export class ReminderSetting {
+  /** Implicit relation to salons.id (no FK, BS-70). */
   @PrimaryColumn({ name: 'salon_id', type: 'uuid' })
   salonId: string;
-
-  @OneToOne(() => Salon, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'salon_id', foreignKeyConstraintName: 'FK_reminder_settings_salon' })
-  salon: Relation<Salon>;
 
   /** Offsets in minutes before the appointment, default [1440, 120]. */
   @Column({ type: 'jsonb', default: [1440, 120] })

@@ -4,16 +4,11 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
-  type Relation,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { MessageChannel, ReminderJobStatus } from '@booking/shared';
-import { Appointment } from './appointment.entity.js';
-import { Salon } from './salon.entity.js';
 import { sqlIn } from './sql-helpers.js';
 
 /** One reminder point of an appointment (BS-26). The cron scans by (status, send_at) (BS-27). */
@@ -26,20 +21,14 @@ export class ReminderJob {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  /** Implicit relation to salons.id (no FK, BS-70). */
   @Index('IDX_reminder_jobs_salon_id')
   @Column({ name: 'salon_id', type: 'uuid' })
   salonId: string;
 
-  @ManyToOne(() => Salon, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'salon_id', foreignKeyConstraintName: 'FK_reminder_jobs_salon' })
-  salon: Relation<Salon>;
-
+  /** Implicit relation to appointments.id (no FK, BS-70). */
   @Column({ name: 'appointment_id', type: 'uuid' })
   appointmentId: string;
-
-  @ManyToOne(() => Appointment, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'appointment_id', foreignKeyConstraintName: 'FK_reminder_jobs_appointment' })
-  appointment: Relation<Appointment>;
 
   /** Minutes before the appointment, e.g. 1440 (24h), 120 (2h). */
   @Column({ name: 'offset_minutes', type: 'integer' })

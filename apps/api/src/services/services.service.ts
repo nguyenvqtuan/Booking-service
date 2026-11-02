@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ErrorCode, type ServiceDto, type ServiceInput, type ServiceUpdate } from '@booking/shared';
 import { AppException } from '../common/app.exception.js';
-import { Appointment, Service } from '../database/entities/index.js';
+import { Appointment, Service, StaffService } from '../database/entities/index.js';
 import { findOwnedOrFail } from '../tenancy/index.js';
 
 const toDto = (s: Service): ServiceDto => ({
@@ -51,6 +51,10 @@ export class ServicesService {
         'Service has appointments; hide it instead',
       );
     }
-    await this.services.delete({ id: service.id, salonId });
+    // No FK cascade (BS-70): remove the staff links together with the service.
+    await this.services.manager.transaction(async (em) => {
+      await em.delete(StaffService, { serviceId: service.id });
+      await em.delete(Service, { id: service.id, salonId });
+    });
   }
 }

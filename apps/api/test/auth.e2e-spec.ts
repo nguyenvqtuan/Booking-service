@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { JwtService } from '@nestjs/jwt';
 import request from 'supertest';
-import { In } from 'typeorm';
 import { ErrorCode } from '@booking/shared';
-import { ReminderSetting, Salon, User } from '../src/database/entities/index.js';
+import { ReminderSetting, User } from '../src/database/entities/index.js';
+import { deleteSalonData } from '../src/salons/salon-deletion.service.js';
 import { createTestApp, type TestApp } from './utils/test-app.js';
 
 const PASSWORD = 'correct-horse-1';
@@ -37,9 +37,7 @@ describe('auth (e2e)', () => {
   });
 
   afterAll(async () => {
-    if (createdSalonIds.length) {
-      await t.dataSource.getRepository(Salon).delete({ id: In(createdSalonIds) });
-    }
+    for (const id of createdSalonIds) await deleteSalonData(t.dataSource.manager, id);
     await t?.app.close();
   });
 

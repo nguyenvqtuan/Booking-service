@@ -74,7 +74,11 @@ export class StaffMembersService {
         'Staff member has appointments; deactivate instead',
       );
     }
-    await this.dataSource.getRepository(Staff).delete({ id: staff.id, salonId });
+    // No FK cascade (BS-70): remove the service links together with the staff member.
+    await this.dataSource.transaction(async (em) => {
+      await em.delete(StaffService, { staffId: staff.id });
+      await em.delete(Staff, { id: staff.id, salonId });
+    });
   }
 
   /** Replaces the staff's services; every service must belong to the same salon. */

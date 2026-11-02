@@ -29,6 +29,11 @@ export interface AuthResult {
   refreshToken: IssuedRefreshToken;
 }
 
+interface UserWithSalon {
+  user: User;
+  salon: Salon;
+}
+
 /** Compared against when the email is unknown, so login timing does not reveal accounts. */
 const DUMMY_PASSWORD_HASH = bcrypt.hashSync('dummy-password-for-timing', 10);
 
@@ -64,7 +69,7 @@ export class AuthService {
     }
   }
 
-  private createOwner(input: RegisterInput, passwordHash: string): Promise<User> {
+  private createOwner(input: RegisterInput, passwordHash: string): Promise<UserWithSalon> {
     return this.dataSource.transaction(async (em) => {
       if (await em.exists(User, { where: { email: input.email } })) {
         throw new AppException(
@@ -92,15 +97,12 @@ export class AuthService {
           ...(input.locale && { locale: input.locale }),
         }),
       );
-      created.salon = salon;
-      return created;
+      return { user: created, salon };
     });
   }
 
   async login(input: LoginInput): Promise<AuthResult> {
-    const user = await this.dataSource
-      .getRepository(User)
-      .findOne({ where: { email: input.email }, relations: { salon: true } });
+    const user = await this.dataSource.getRepository(User).findOneBy({ email: input.email });
     const valid = await bcrypt.compare(input.password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
     if (!user || !valid) {
       throw new AppException(
@@ -109,7 +111,7 @@ export class AuthService {
         'Invalid email or password',
       );
     }
-    return this.authenticate(user);
+    return this.authenticate(await this.withSalon(user));
   }
 
   async refresh(rawRefreshToken: string | undefined): Promise<AuthResult> {
@@ -186,39 +188,45 @@ export class AuthService {
     });
   }
 
-  private async authenticate(user: User): Promise<AuthResult> {
+  private async authenticate(owner: UserWithSalon): Promise<AuthResult> {
     return {
-      response: await this.buildResponse(user),
-      refreshToken: await this.refreshTokens.issue(user.id),
+      response: await this.buildResponse(owner),
+      refreshToken: await this.refreshTokens.issue(owner.user.id),
     };
   }
 
-  private async buildResponse(user: User): Promise<AuthResponse> {
+  private async buildResponse({ user, salon }: UserWithSalon): Promise<AuthResponse> {
     const payload: AccessTokenPayload = { sub: user.id, salonId: user.salonId };
     return {
       accessToken: await this.jwt.signAsync(payload),
       expiresIn: this.config.getOrThrow<number>('JWT_ACCESS_TTL_SEC'),
-      user: this.toAuthUser(user),
+      user: this.toAuthUser({ user, salon }),
     };
   }
 
-  private toAuthUser(user: User): AuthUser {
+  private toAuthUser({ user, salon }: UserWithSalon): AuthUser {
     return {
       id: user.id,
       email: user.email,
       fullName: user.fullName,
       locale: user.locale,
       salonId: user.salonId,
-      salonName: user.salon.name,
-      salonSlug: user.salon.slug,
-      salonTimezone: user.salon.timezone,
+      salonName: salon.name,
+      salonSlug: salon.slug,
+      salonTimezone: salon.timezone,
     };
   }
 
-  private findUserWithSalon(userId: string): Promise<User> {
-    return this.dataSource
-      .getRepository(User)
-      .findOneOrFail({ where: { id: userId }, relations: { salon: true } });
+  private async findUserWithSalon(userId: string): Promise<UserWithSalon> {
+    return this.withSalon(
+      await this.dataSource.getRepository(User).findOneByOrFail({ id: userId }),
+    );
+  }
+
+  /** Loads the user's salon through the implicit users.salon_id relation (BS-70). */
+  private async withSalon(user: User): Promise<UserWithSalon> {
+    const salon = await this.dataSource.getRepository(Salon).findOneByOrFail({ id: user.salonId });
+    return { user, salon };
   }
 
   /** "Tiệm A" -> "tiem-a", then "tiem-a-2", "tiem-a-3"... if taken. */
