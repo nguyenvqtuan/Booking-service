@@ -1,0 +1,39 @@
+{
+  "title": "Nhân viên",
+  "add": "Thêm nhân viên",
+  "editTitle": "Sửa nhân viên",
+  "empty": "Chưa có nhân viên nào.",
+  "fields": {
+    "name": "Họ tên",
+    "phone": "Số điện thoại",
+    "workingHours": "Giờ làm việc",
+    "services": "Dịch vụ đảm nhận"
+  },
+  "weekdays": {
+    "mon": "Thứ 2",
+    "tue": "Thứ 3",
+    "wed": "Thứ 4",
+    "thu": "Thứ 5",
+    "fri": "Thứ 6",
+    "sat": "Thứ 7",
+    "sun": "Chủ nhật"
+  },
+  "dayOff": "Nghỉ",
+  "addShift": "+ Ca",
+  "addShiftFor": "Thêm ca cho {{day}}",
+  "removeShift": "Xoá ca {{n}} của {{day}}",
+  "shiftStart": "Giờ bắt đầu ca {{n}} {{day}}",
+  "shiftEnd": "Giờ kết thúc ca {{n}} {{day}}",
+  "errors": { "shifts": "Giờ kết thúc phải sau giờ bắt đầu và các ca không được chồng nhau." },
+  "noServices": "Chưa có dịch vụ. Hãy thêm dịch vụ trước.",
+  "workDays": "Ngày làm",
+  "noWorkDays": "Chưa có lịch làm",
+  "inactive": "Ngừng làm",
+  "actions": "Thao tác",
+  "edit": "Sửa",
+  "deactivate": "Ngừng",
+  "activate": "Kích hoạt",
+  "delete": "Xoá",
+  "save": "Lưu",
+  "confirmDelete": "Xoá nhân viên \"{{name}}\"? Hành động này không thể hoàn tác."
+}

@@ -7,5 +7,6 @@
   "NOT_FOUND": "Not found.",
   "CONFLICT": "This conflicts with existing data.",
   "fallback": "Something went wrong, please try again.",
-  "SERVICE_IN_USE": "This service has appointments and cannot be deleted. Hide it instead."
+  "SERVICE_IN_USE": "This service has appointments and cannot be deleted. Hide it instead.",
+  "STAFF_IN_USE": "This staff member has appointments and cannot be deleted. Deactivate them instead."
 }

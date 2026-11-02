@@ -16,6 +16,7 @@ export const ErrorCode = {
   AuthInvalidRefreshToken: 'AUTH_INVALID_REFRESH_TOKEN',
   AuthInvalidResetToken: 'AUTH_INVALID_RESET_TOKEN',
   ServiceInUse: 'SERVICE_IN_USE',
+  StaffInUse: 'STAFF_IN_USE',
 } as const;
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 

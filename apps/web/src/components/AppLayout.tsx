@@ -25,6 +25,7 @@ export function AppLayout() {
           {t('nav.overview')}
         </NavLink>
         <NavLink to="/services">{t('nav.services')}</NavLink>
+        <NavLink to="/staff">{t('nav.staff')}</NavLink>
       </nav>
       <main className="container">
         <Outlet />
