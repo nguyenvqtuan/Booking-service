@@ -15,6 +15,7 @@ import {
 import { AppException } from '../common/app.exception.js';
 import { isPgError, PgErrorCode } from '../common/pg-errors.js';
 import { Appointment, Customer, Service, Staff, StaffService } from '../database/entities/index.js';
+import { ReminderScheduler } from '../reminders/reminder-scheduler.service.js';
 import { findOwnedOrFail } from '../tenancy/index.js';
 
 const overlap = () =>
@@ -32,7 +33,10 @@ interface ResolvedRefs {
 
 @Injectable()
 export class AppointmentsService {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private readonly dataSource: DataSource,
+    private readonly reminders: ReminderScheduler,
+  ) {}
 
   /** Appointments overlapping [from, to), optionally for one staff member. */
   async list(
@@ -56,7 +60,7 @@ export class AppointmentsService {
       .getRawOne<RawAppointment>();
     if (!row)
       throw new AppException(HttpStatus.NOT_FOUND, ErrorCode.NotFound, 'Appointment not found');
-    return toDto(row);
+    return { ...toDto(row), reminders: await this.reminders.listFor(em, row.id) };
   }
 
   async create(
@@ -80,6 +84,7 @@ export class AppointmentsService {
           note: input.note ?? null,
         }),
       );
+      await this.reminders.sync(em, saved);
       return this.get(salonId, saved.id, em);
     });
   }
@@ -117,6 +122,7 @@ export class AppointmentsService {
           ...(input.note !== undefined && { note: input.note }),
         },
       );
+      await this.reminders.sync(em, await em.findOneByOrFail(Appointment, { id: appt.id }));
       return this.get(salonId, appt.id, em);
     });
   }
@@ -149,6 +155,7 @@ export class AppointmentsService {
           'The appointment was changed concurrently',
         );
       }
+      await this.reminders.sync(em, { ...appt, status });
       return this.get(salonId, appt.id, em);
     });
   }

@@ -1,0 +1,25 @@
+{
+  "save": "Save settings",
+  "saved": "Saved. Settings apply to appointments created or changed from now on.",
+  "offset": {
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "hours_one": "{{count}} hour",
+    "hours_other": "{{count}} hours",
+    "minutes_one": "{{count}} minute",
+    "minutes_other": "{{count}} minutes",
+    "hoursMinutes": "{{h}} h {{m}} min"
+  },
+  "reminders": {
+    "title": "Reminder settings",
+    "description": "Customers automatically get a Zalo (ZNS) reminder before their appointment at the times below.",
+    "offsets": "Send reminders before the appointment",
+    "before": "{{offset}} before",
+    "customHours": "Hours",
+    "customMinutes": "Minutes",
+    "addCustom": "Add time",
+    "limits": "Up to {{max}} times, between 5 minutes and 7 days.",
+    "none": "No reminder times selected: customers will not be reminded.",
+    "fallback": "Send an SMS when the customer cannot receive the Zalo message"
+  }
+}
