@@ -15,6 +15,7 @@ import {
   resetPasswordSchema,
 } from '@booking/shared';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
+import { TenantAgnostic } from '../tenancy/index.js';
 import { type AuthResult, AuthService } from './auth.service.js';
 import { CurrentUser } from './current-user.decorator.js';
 import { Public } from './public.decorator.js';
@@ -91,6 +92,7 @@ export class AuthController {
   }
 
   @Get('me')
+  @TenantAgnostic('Reads the authenticated user by id from the token')
   me(@CurrentUser() user: AccessTokenPayload): Promise<AuthUser> {
     return this.auth.me(user.sub);
   }
