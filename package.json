@@ -2,7 +2,7 @@
   "name": "booking-service",
   "private": true,
   "version": "0.0.0",
-  "description": "Web app đặt lịch và nhắc hẹn tự động cho tiệm (React + NestJS + PostgreSQL)",
+  "description": "Appointment booking and automatic reminder web app for salons (React + NestJS + PostgreSQL)",
   "packageManager": "pnpm@11.24.0",
   "engines": {
     "node": ">=20"

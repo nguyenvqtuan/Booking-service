@@ -6,7 +6,7 @@ export enum AppointmentStatus {
   NoShow = 'no_show',
 }
 
-/** Trạng thái chiếm slot của nhân viên (dùng cho exclusion constraint và tính slot). */
+/** Statuses that occupy a staff time slot (used by the exclusion constraint and slot search). */
 export const ACTIVE_APPOINTMENT_STATUSES = [
   AppointmentStatus.Booked,
   AppointmentStatus.Confirmed,

@@ -10,7 +10,15 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
+    "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
+    "typeorm": "node --import tsx ./node_modules/typeorm/cli.js -d src/database/data-source.ts",
+    "migration:create": "node --import tsx ./node_modules/typeorm/cli.js migration:create",
+    "migration:generate": "pnpm typeorm migration:generate",
+    "migration:run": "pnpm typeorm migration:run",
+    "migration:revert": "pnpm typeorm migration:revert",
+    "migration:show": "pnpm typeorm migration:show",
+    "migration:check": "pnpm typeorm migration:generate src/database/migrations/SchemaDrift --check",
+    "seed": "node --import tsx src/database/seeds/run-seed.ts"
   },
   "dependencies": {
     "@booking/shared": "workspace:*",
