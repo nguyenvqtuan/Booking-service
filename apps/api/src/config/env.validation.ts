@@ -21,4 +21,12 @@ export const envValidationSchema = Joi.object({
   BCRYPT_ROUNDS: Joi.number().integer().min(4).max(15).default(10),
   COOKIE_SECURE: Joi.boolean().truthy('true').falsy('false').default(false),
   APP_WEB_URL: Joi.string().uri().default('http://localhost:5173'),
+
+  REDIS_URL: Joi.string()
+    .uri({ scheme: ['redis', 'rediss'] })
+    .default('redis://localhost:6379'),
+  /** Run the reminder dispatch cron in this API instance (BS-27). */
+  REMINDER_CRON_ENABLED: Joi.boolean().truthy('true').falsy('false').default(true),
+  /** Message provider: 'fake' logs messages instead of sending them (dev/tests). */
+  MESSAGE_PROVIDER: Joi.string().valid('fake', 'live').default('fake'),
 });
