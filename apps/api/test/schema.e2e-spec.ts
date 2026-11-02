@@ -144,6 +144,35 @@ describe('database schema (e2e)', () => {
     });
   });
 
+  it('still blocks deleting a service or staff member that has appointments', async () => {
+    await appointment();
+    expect(await pgErrorCode(ds.getRepository(Service).delete({ id: service.id }))).toBe('23503');
+    expect(await pgErrorCode(ds.getRepository(Staff).delete({ id: staff.id }))).toBe('23503');
+  });
+
+  it('deletes a whole salon with appointments in one cascade', async () => {
+    const other = await ds
+      .getRepository(Salon)
+      .save({ name: 'Doomed', slug: `doomed-${randomUUID()}` });
+    const [st] = await ds.getRepository(Staff).save([{ salonId: other.id, name: 'S' }]);
+    const sv = await ds
+      .getRepository(Service)
+      .save({ salonId: other.id, name: 'Sv', durationMin: 30 });
+    const cu = await ds
+      .getRepository(Customer)
+      .save({ salonId: other.id, name: 'C', phone: '+84900000999' });
+    await ds.getRepository(Appointment).insert({
+      salonId: other.id,
+      staffId: st.id,
+      serviceId: sv.id,
+      customerId: cu.id,
+      startAt: at('2030-01-01T08:00:00Z'),
+      endAt: at('2030-01-01T08:30:00Z'),
+    });
+    await ds.getRepository(Salon).delete({ id: other.id });
+    expect(await ds.getRepository(Appointment).countBy({ salonId: other.id })).toBe(0);
+  });
+
   it('cascades reminder jobs when an appointment is deleted', async () => {
     const { identifiers } = await appointment();
     const appointmentId = identifiers[0].id as string;

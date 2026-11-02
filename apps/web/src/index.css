@@ -252,3 +252,70 @@ a {
   margin: 0;
   font-size: 1.25rem;
 }
+.hours-editor,
+.checkbox-group {
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 8px 12px 12px;
+  margin: 0 0 14px;
+}
+.hours-editor legend,
+.checkbox-group legend {
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0 4px;
+}
+.hours-row {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 4px 8px;
+  align-items: start;
+  padding: 6px 0;
+  border-bottom: 1px solid #eaeef2;
+}
+.hours-row:last-child {
+  border-bottom: 0;
+}
+.hours-row .field-error {
+  grid-column: 1 / -1;
+}
+.hours-day {
+  font-size: 0.875rem;
+  padding-top: 6px;
+}
+.hours-shifts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.hours-shift {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.hours-shift input {
+  font: inherit;
+  padding: 4px 6px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+}
+.hours-off {
+  color: #8c959f;
+  font-size: 0.875rem;
+}
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+.badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: #eaeef2;
+  color: #57606a;
+}

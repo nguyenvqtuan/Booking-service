@@ -13,7 +13,8 @@
   },
   "nav": {
     "overview": "Overview",
-    "services": "Services"
+    "services": "Services",
+    "staff": "Staff"
   },
   "close": "Close"
 }

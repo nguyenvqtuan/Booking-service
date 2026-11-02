@@ -3,6 +3,7 @@ export * from './enums.js';
 export * from './error-codes.js';
 export * from './locale.js';
 export * from './services.js';
+export * from './staff.js';
 export * from './time.js';
 export * from './working-hours.js';
 

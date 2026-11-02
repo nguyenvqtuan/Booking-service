@@ -1,0 +1,39 @@
+{
+  "title": "Staff",
+  "add": "Add staff member",
+  "editTitle": "Edit staff member",
+  "empty": "No staff members yet.",
+  "fields": {
+    "name": "Full name",
+    "phone": "Phone number",
+    "workingHours": "Working hours",
+    "services": "Services offered"
+  },
+  "weekdays": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  },
+  "dayOff": "Day off",
+  "addShift": "+ Shift",
+  "addShiftFor": "Add shift for {{day}}",
+  "removeShift": "Remove shift {{n}} on {{day}}",
+  "shiftStart": "Start of shift {{n}} on {{day}}",
+  "shiftEnd": "End of shift {{n}} on {{day}}",
+  "errors": { "shifts": "Shifts must end after they start and must not overlap." },
+  "noServices": "No services yet. Add services first.",
+  "workDays": "Work days",
+  "noWorkDays": "No schedule",
+  "inactive": "Inactive",
+  "actions": "Actions",
+  "edit": "Edit",
+  "deactivate": "Deactivate",
+  "activate": "Activate",
+  "delete": "Delete",
+  "save": "Save",
+  "confirmDelete": "Delete staff member \"{{name}}\"? This cannot be undone."
+}

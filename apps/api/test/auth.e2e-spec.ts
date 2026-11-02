@@ -86,6 +86,38 @@ describe('auth (e2e)', () => {
       expect(res.body.code).toBe(ErrorCode.AuthEmailTaken);
     });
 
+    it('handles concurrent sign-ups with the same salon name (unique slugs, no 500)', async () => {
+      const results = await Promise.all(
+        Array.from({ length: 4 }, () =>
+          http().post('/auth/register').send({
+            salonName: 'Tiệm Đồng Thời',
+            fullName: 'Owner',
+            email: newEmail(),
+            password: PASSWORD,
+          }),
+        ),
+      );
+      expect(results.map((r) => r.status)).toEqual([201, 201, 201, 201]);
+      results.forEach((r) => createdSalonIds.push(r.body.user.salonId));
+      const slugs = results.map((r) => r.body.user.salonSlug);
+      expect(new Set(slugs).size).toBe(4);
+    });
+
+    it('returns 409 (not 500) for concurrent sign-ups with the same email', async () => {
+      const email = newEmail();
+      const results = await Promise.all(
+        [1, 2].map(() =>
+          http()
+            .post('/auth/register')
+            .send({ salonName: 'Dup', fullName: 'Owner', email, password: PASSWORD }),
+        ),
+      );
+      expect(results.map((r) => r.status).sort()).toEqual([201, 409]);
+      results
+        .filter((r) => r.status === 201)
+        .forEach((r) => createdSalonIds.push(r.body.user.salonId));
+    });
+
     it('gives each salon a unique slug', async () => {
       const a = await register();
       const b = await register();
