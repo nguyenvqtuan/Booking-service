@@ -19,6 +19,11 @@ export const ErrorCode = {
   StaffInUse: 'STAFF_IN_USE',
   CustomerInUse: 'CUSTOMER_IN_USE',
   CustomerPhoneTaken: 'CUSTOMER_PHONE_TAKEN',
+  AppointmentOverlap: 'APPOINTMENT_OVERLAP',
+  AppointmentInvalidTransition: 'APPOINTMENT_INVALID_TRANSITION',
+  AppointmentNotEditable: 'APPOINTMENT_NOT_EDITABLE',
+  StaffCannotPerformService: 'STAFF_CANNOT_PERFORM_SERVICE',
+  ReferenceInactive: 'REFERENCE_INACTIVE',
 } as const;
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 

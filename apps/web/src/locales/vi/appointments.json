@@ -1,0 +1,26 @@
+{
+  "title": "Lịch hẹn",
+  "add": "Tạo lịch hẹn",
+  "editTitle": "Sửa lịch hẹn",
+  "empty": "Không có lịch hẹn nào trong ngày.",
+  "allStaff": "Tất cả nhân viên",
+  "fields": {
+    "customer": "Khách hàng",
+    "service": "Dịch vụ",
+    "staff": "Nhân viên",
+    "date": "Ngày",
+    "time": "Giờ",
+    "note": "Ghi chú"
+  },
+  "customerSearch": "Tìm theo tên hoặc SĐT",
+  "choose": "— Chọn —",
+  "minutes_one": "{{count}} phút",
+  "minutes_other": "{{count}} phút",
+  "requiredFields": "Vui lòng chọn khách hàng, dịch vụ, nhân viên, ngày và giờ.",
+  "confirm": "Xác nhận",
+  "complete": "Hoàn thành",
+  "edit": "Sửa",
+  "cancel": "Huỷ lịch",
+  "save": "Lưu",
+  "confirmCancel": "Huỷ lịch hẹn này? Khung giờ sẽ được giải phóng."
+}

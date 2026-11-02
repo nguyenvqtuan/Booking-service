@@ -1,0 +1,26 @@
+{
+  "title": "Appointments",
+  "add": "New appointment",
+  "editTitle": "Edit appointment",
+  "empty": "No appointments on this day.",
+  "allStaff": "All staff",
+  "fields": {
+    "customer": "Customer",
+    "service": "Service",
+    "staff": "Staff member",
+    "date": "Date",
+    "time": "Time",
+    "note": "Note"
+  },
+  "customerSearch": "Search by name or phone",
+  "choose": "— Select —",
+  "minutes_one": "{{count}} minute",
+  "minutes_other": "{{count}} minutes",
+  "requiredFields": "Please choose a customer, service, staff member, date and time.",
+  "confirm": "Confirm",
+  "complete": "Complete",
+  "edit": "Edit",
+  "cancel": "Cancel",
+  "save": "Save",
+  "confirmCancel": "Cancel this appointment? The time slot will be freed."
+}

@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 import { AuthProvider } from './auth/AuthProvider';
 import { GuestOnly, RequireAuth } from './auth/RequireAuth';
 import { AppLayout } from './components/AppLayout';
+import { AppointmentsPage } from './pages/appointments/AppointmentsPage';
 import { CustomersPage } from './pages/customers/CustomersPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { HomePage } from './pages/HomePage';
@@ -27,6 +28,7 @@ export function AppRoutes() {
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/appointments" element={<AppointmentsPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/staff" element={<StaffPage />} />
           <Route path="/customers" element={<CustomersPage />} />
