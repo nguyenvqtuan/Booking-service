@@ -2,8 +2,8 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 /**
- * Nạp file .env cho các tiến trình không đi qua ConfigModule (TypeORM CLI, seed).
- * Thứ tự ưu tiên: biến môi trường có sẵn > apps/api/.env > .env ở gốc repo.
+ * Loads .env files for processes that do not go through ConfigModule (TypeORM CLI, seed).
+ * Precedence: existing environment variables > apps/api/.env > repo-root .env.
  */
 export function loadEnvFiles(cwd = process.cwd()): void {
   for (const file of [resolve(cwd, '.env'), resolve(cwd, '../../.env')]) {
@@ -11,5 +11,5 @@ export function loadEnvFiles(cwd = process.cwd()): void {
   }
 }
 
-/** Danh sách file .env cho ConfigModule (file trước được ưu tiên). */
+/** .env file paths for ConfigModule (earlier files take precedence). */
 export const ENV_FILE_PATHS = ['.env', '../../.env'];

@@ -3,7 +3,7 @@ import { envValidationSchema } from './env.validation.js';
 const base = { DB_HOST: 'localhost', DB_USER: 'u', DB_PASSWORD: 'p', DB_NAME: 'db' };
 
 describe('envValidationSchema', () => {
-  it('áp giá trị mặc định', () => {
+  it('applies default values', () => {
     const { value, error } = envValidationSchema.validate(base);
     expect(error).toBeUndefined();
     expect(value).toMatchObject({
@@ -14,12 +14,12 @@ describe('envValidationSchema', () => {
     });
   });
 
-  it('báo lỗi khi thiếu DB_HOST', () => {
+  it('fails when DB_HOST is missing', () => {
     const { error } = envValidationSchema.validate({ ...base, DB_HOST: undefined });
     expect(error?.message).toContain('DB_HOST');
   });
 
-  it('parse DB_SSL dạng chuỗi', () => {
+  it('parses DB_SSL given as a string', () => {
     const { value } = envValidationSchema.validate({ ...base, DB_SSL: 'true' });
     expect(value.DB_SSL).toBe(true);
   });

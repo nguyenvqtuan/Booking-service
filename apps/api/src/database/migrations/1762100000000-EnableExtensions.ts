@@ -1,8 +1,8 @@
 import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 /**
- * Migration mẫu (BS-12) và cũng là tiền đề cho BS-13:
- * btree_gist cần cho exclusion constraint chống trùng giờ trên appointments.
+ * Sample migration (BS-12) and prerequisite for BS-13:
+ * btree_gist is required by the no-overlap exclusion constraint on appointments.
  */
 export class EnableExtensions1762100000000 implements MigrationInterface {
   name = 'EnableExtensions1762100000000';

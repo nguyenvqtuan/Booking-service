@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-/** Biến môi trường bắt buộc/tuỳ chọn của API. App không khởi động nếu sai. */
+/** Required/optional API environment variables. The app refuses to start when invalid. */
 export const envValidationSchema = Joi.object({
   NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
   PORT: Joi.number().port().default(3000),

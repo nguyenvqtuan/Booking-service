@@ -17,7 +17,7 @@ describe('GET /health (e2e)', () => {
     await app?.close();
   });
 
-  it('trả 200 và database up khi DB sống', async () => {
+  it('returns 200 with database up when the DB is alive', async () => {
     const res = await request(app.getHttpServer()).get('/health').expect(200);
     expect(res.body.status).toBe('ok');
     expect(res.body.info.database.status).toBe('up');

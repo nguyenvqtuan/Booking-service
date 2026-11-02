@@ -8,7 +8,7 @@ export class HealthController {
     private readonly db: TypeOrmHealthIndicator,
   ) {}
 
-  /** 200 khi DB phản hồi, 503 khi không kết nối được. */
+  /** 200 when the database responds, 503 when it is unreachable. */
   @Get()
   @HealthCheck()
   check() {

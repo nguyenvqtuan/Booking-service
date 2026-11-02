@@ -17,7 +17,7 @@ export interface DbEnv {
 
 const toBool = (v: boolean | string | undefined) => v === true || v === 'true';
 
-/** Cấu hình DataSource dùng chung cho Nest (DatabaseModule) và TypeORM CLI. */
+/** DataSource options shared by Nest (DatabaseModule) and the TypeORM CLI. */
 export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
   return {
     type: 'postgres',
@@ -31,7 +31,7 @@ export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
     entities: ENTITIES,
     migrations: [join(here, 'migrations', '*.{ts,js}')],
     migrationsTableName: 'migrations',
-    // Luôn dùng migration, không để TypeORM tự sửa schema.
+    // Always use migrations; never let TypeORM alter the schema automatically.
     synchronize: false,
     migrationsRun: false,
   };
