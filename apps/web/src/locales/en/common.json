@@ -1,0 +1,11 @@
+{
+  "appName": "Booking Service",
+  "loading": "Loading…",
+  "logout": "Sign out",
+  "language": "Language",
+  "languages": { "vi": "Tiếng Việt", "en": "English" },
+  "home": {
+    "title": "Overview",
+    "greeting": "Hello <strong>{{name}}</strong>. Your public booking page: <code>/{{slug}}</code>"
+  }
+}

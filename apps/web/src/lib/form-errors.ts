@@ -1,8 +1,8 @@
 import type { FieldError } from 'react-hook-form';
 import { PASSWORD_MIN_LENGTH } from '@booking/shared';
+import i18n from '../i18n';
 
-// TODO(BS-69): move these messages into the i18n resource files.
-/** Maps Zod issue codes (exposed by zodResolver as `error.type`) to Vietnamese messages. */
+/** Maps Zod issue codes (exposed by zodResolver as `error.type`) to translated messages. */
 export function fieldErrorMessage(
   error: FieldError | undefined,
   field?: string,
@@ -11,15 +11,15 @@ export function fieldErrorMessage(
   switch (error.type) {
     case 'too_small':
       return field === 'password'
-        ? `Mật khẩu tối thiểu ${PASSWORD_MIN_LENGTH} ký tự.`
-        : 'Giá trị quá ngắn.';
+        ? i18n.t('validation:password_too_small', { min: PASSWORD_MIN_LENGTH })
+        : i18n.t('validation:too_small');
     case 'too_big':
-      return 'Giá trị quá dài.';
+      return i18n.t('validation:too_big');
     case 'invalid_format':
-      return 'Email không hợp lệ.';
+      return i18n.t('validation:invalid_email');
     case 'passwords_mismatch':
-      return 'Mật khẩu nhập lại không khớp.';
+      return i18n.t('validation:passwords_mismatch');
     default:
-      return 'Giá trị không hợp lệ.';
+      return i18n.t('validation:invalid');
   }
 }

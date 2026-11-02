@@ -1,4 +1,5 @@
 import {
+  Check,
   Column,
   CreateDateColumn,
   Entity,
@@ -10,10 +11,13 @@ import {
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
+import { DEFAULT_LOCALE, type Locale, SUPPORTED_LOCALES } from '@booking/shared';
 import { Salon } from './salon.entity.js';
+import { sqlIn } from './sql-helpers.js';
 
 @Entity('customers')
 @Unique('UQ_customers_salon_phone', ['salonId', 'phone'])
+@Check('CHK_customers_locale', `"locale" IN ${sqlIn(SUPPORTED_LOCALES)}`)
 export class Customer {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -38,6 +42,10 @@ export class Customer {
 
   @Column({ name: 'no_show_count', type: 'integer', default: 0 })
   noShowCount: number;
+
+  /** UI language (users) / reminder template language (customers). */
+  @Column({ type: 'varchar', length: 5, default: DEFAULT_LOCALE })
+  locale: Locale;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, Req, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import {
@@ -13,6 +13,8 @@ import {
   registerSchema,
   type ResetPasswordInput,
   resetPasswordSchema,
+  type UpdateProfileInput,
+  updateProfileSchema,
 } from '@booking/shared';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
 import { TenantAgnostic } from '../tenancy/index.js';
@@ -95,6 +97,15 @@ export class AuthController {
   @TenantAgnostic('Reads the authenticated user by id from the token')
   me(@CurrentUser() user: AccessTokenPayload): Promise<AuthUser> {
     return this.auth.me(user.sub);
+  }
+
+  @Patch('me')
+  @TenantAgnostic('Updates the authenticated user by id from the token')
+  updateProfile(
+    @CurrentUser() user: AccessTokenPayload,
+    @Body(new ZodValidationPipe(updateProfileSchema)) body: UpdateProfileInput,
+  ): Promise<AuthUser> {
+    return this.auth.updateProfile(user.sub, body);
   }
 
   private withCookie(res: Response, result: AuthResult): AuthResponse {

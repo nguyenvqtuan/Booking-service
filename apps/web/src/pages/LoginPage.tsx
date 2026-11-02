@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { type LoginInput, loginSchema } from '@booking/shared';
 import { useAuth } from '../auth/auth-context';
@@ -10,6 +11,7 @@ import { getApiErrorMessage } from '../lib/api-error';
 import { fieldErrorMessage } from '../lib/form-errors';
 
 export function LoginPage() {
+  const { t } = useTranslation('auth');
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,17 +35,17 @@ export function LoginPage() {
   });
 
   return (
-    <AuthLayout title="Đăng nhập">
+    <AuthLayout title={t('login.title')}>
       <form onSubmit={onSubmit} noValidate>
         <FormField
-          label="Email"
+          label={t('fields.email')}
           type="email"
           autoComplete="email"
           error={fieldErrorMessage(errors.email)}
           {...register('email')}
         />
         <FormField
-          label="Mật khẩu"
+          label={t('fields.password')}
           type="password"
           autoComplete="current-password"
           error={fieldErrorMessage(errors.password, 'password')}
@@ -55,13 +57,13 @@ export function LoginPage() {
           </p>
         )}
         <button type="submit" className="btn-primary" disabled={isSubmitting}>
-          {isSubmitting ? 'Đang đăng nhập…' : 'Đăng nhập'}
+          {isSubmitting ? t('login.submitting') : t('login.submit')}
         </button>
       </form>
       <p className="auth-links">
-        <Link to="/forgot-password">Quên mật khẩu?</Link>
+        <Link to="/forgot-password">{t('login.forgot')}</Link>
         <span>
-          Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
+          {t('login.noAccount')} <Link to="/register">{t('login.registerLink')}</Link>
         </span>
       </p>
     </AuthLayout>

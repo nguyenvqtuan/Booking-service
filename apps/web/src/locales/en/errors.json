@@ -1,0 +1,10 @@
+{
+  "AUTH_INVALID_CREDENTIALS": "Incorrect email or password.",
+  "AUTH_EMAIL_TAKEN": "This email is already registered.",
+  "AUTH_INVALID_RESET_TOKEN": "The password reset link is invalid or has expired.",
+  "VALIDATION_FAILED": "Some fields are invalid, please check and try again.",
+  "RATE_LIMITED": "Too many requests, please try again later.",
+  "NOT_FOUND": "Not found.",
+  "CONFLICT": "This conflicts with existing data.",
+  "fallback": "Something went wrong, please try again."
+}

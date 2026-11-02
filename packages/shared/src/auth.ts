@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { type Locale, localeSchema } from './locale.js';
 
 export const PASSWORD_MIN_LENGTH = 8;
 
@@ -10,6 +11,7 @@ export const registerSchema = z.object({
   fullName: z.string().trim().min(2).max(150),
   email,
   password,
+  locale: localeSchema.optional(),
 });
 export type RegisterInput = z.infer<typeof registerSchema>;
 
@@ -28,10 +30,14 @@ export const resetPasswordSchema = z.object({
 });
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
+export const updateProfileSchema = z.object({ locale: localeSchema });
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
 export interface AuthUser {
   id: string;
   email: string;
   fullName: string;
+  locale: Locale;
   salonId: string;
   salonName: string;
   salonSlug: string;

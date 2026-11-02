@@ -1,0 +1,8 @@
+{
+  "too_small": "This value is too short.",
+  "password_too_small": "Password must be at least {{min}} characters.",
+  "too_big": "This value is too long.",
+  "invalid_email": "Invalid email address.",
+  "passwords_mismatch": "Passwords do not match.",
+  "invalid": "Invalid value."
+}

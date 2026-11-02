@@ -14,6 +14,7 @@ import {
   type LoginInput,
   type RegisterInput,
   type ResetPasswordInput,
+  type UpdateProfileInput,
 } from '@booking/shared';
 import { AppException } from '../common/app.exception.js';
 import { slugify } from '../common/slugify.js';
@@ -68,6 +69,7 @@ export class AuthService {
           email: input.email,
           passwordHash,
           fullName: input.fullName,
+          ...(input.locale && { locale: input.locale }),
         }),
       );
       created.salon = salon;
@@ -114,6 +116,11 @@ export class AuthService {
 
   async me(userId: string): Promise<AuthUser> {
     return this.toAuthUser(await this.findUserWithSalon(userId));
+  }
+
+  async updateProfile(userId: string, input: UpdateProfileInput): Promise<AuthUser> {
+    await this.dataSource.getRepository(User).update({ id: userId }, { locale: input.locale });
+    return this.me(userId);
   }
 
   /** Always succeeds so the endpoint cannot be used to discover registered emails. */
@@ -182,6 +189,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       fullName: user.fullName,
+      locale: user.locale,
       salonId: user.salonId,
       salonName: user.salon.name,
       salonSlug: user.salon.slug,

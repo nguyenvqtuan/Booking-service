@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Navigate, Outlet, useLocation } from 'react-router';
 import { useAuth } from './auth-context';
 
@@ -22,9 +23,10 @@ export function GuestOnly() {
 }
 
 function FullPageSpinner() {
+  const { t } = useTranslation();
   return (
     <p className="container" role="status">
-      Đang tải…
+      {t('loading')}
     </p>
   );
 }

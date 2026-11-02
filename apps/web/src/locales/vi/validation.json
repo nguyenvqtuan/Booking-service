@@ -1,0 +1,8 @@
+{
+  "too_small": "Giá trị quá ngắn.",
+  "password_too_small": "Mật khẩu tối thiểu {{min}} ký tự.",
+  "too_big": "Giá trị quá dài.",
+  "invalid_email": "Email không hợp lệ.",
+  "passwords_mismatch": "Mật khẩu nhập lại không khớp.",
+  "invalid": "Giá trị không hợp lệ."
+}
