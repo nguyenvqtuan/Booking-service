@@ -10,6 +10,7 @@ import { envValidationSchema } from './config/env.validation.js';
 import { DatabaseModule } from './database/database.module.js';
 import { HealthModule } from './health/health.module.js';
 import { MailModule } from './mail/mail.module.js';
+import { SalonsModule } from './salons/salons.module.js';
 import { ServicesModule } from './services/services.module.js';
 import { StaffModule } from './staff/staff.module.js';
 
@@ -27,6 +28,7 @@ import { StaffModule } from './staff/staff.module.js';
     ServicesModule,
     StaffModule,
     CustomersModule,
+    SalonsModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_FILTER, useClass: HttpExceptionFilter }],

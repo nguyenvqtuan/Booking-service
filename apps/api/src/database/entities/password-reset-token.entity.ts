@@ -1,15 +1,4 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  type Relation,
-  Unique,
-} from 'typeorm';
-import { User } from './user.entity.js';
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
 /** Single-use password reset token (only its SHA-256 hash is stored). */
 @Entity('password_reset_tokens')
@@ -18,13 +7,10 @@ export class PasswordResetToken {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  /** Implicit relation to users.id (no FK, BS-70). */
   @Index('IDX_password_reset_tokens_user_id')
   @Column({ name: 'user_id', type: 'uuid' })
   userId: string;
-
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id', foreignKeyConstraintName: 'FK_password_reset_tokens_user' })
-  user: Relation<User>;
 
   @Column({ name: 'token_hash', type: 'char', length: 64 })
   tokenHash: string;

@@ -11,7 +11,12 @@
 ## Conventions
 
 - Monorepo: pnpm workspace — `apps/api` (NestJS 12, ESM), `apps/web` (React + Vite), `packages/shared`.
-- API is ESM: relative imports use the `.js` extension; wrap relation property types in `Relation<>`.
+- API is ESM: relative imports use the `.js` extension.
+- **No relations in the ORM and no foreign keys in the DB (BS-70).** Entities only have `*_id` columns
+  (indexed, documented as "Implicit relation to <table>.id"). Services must check that referenced ids exist
+  _and_ belong to the same salon before writing, and delete dependent rows themselves (e.g. `staff_services`).
+  Register every new `*_id` column in `src/database/implicit-relations.ts`; delete salons only through
+  `SalonDeletionService`. The schema e2e test fails on unregistered `*_id` columns, any FK, or orphaned rows.
 - TypeORM: explicit column `type` on every column; schema changes only through migrations
   (`pnpm --filter @booking/api migration:generate ...`), and `migration:check` must report no drift.
 - Multi-tenancy: every authenticated handler takes `@CurrentSalon() salonId` and filters every query

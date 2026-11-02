@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { ErrorCode } from '@booking/shared';
-import { Appointment, Customer } from '../src/database/entities/index.js';
+import { Appointment, Customer, StaffService } from '../src/database/entities/index.js';
+import { findOrphans } from '../src/database/implicit-relations.js';
 import { OwnerFactory, type TestOwner } from './utils/owners.js';
 import { createTestApp, type TestApp } from './utils/test-app.js';
 
@@ -135,6 +136,28 @@ describe('staff CRUD (e2e)', () => {
       .send({ name: 'Idle', workingHours: {} })
       .expect(201);
     await a.delete(`/staff/${idle.id}`).expect(204);
+  });
+
+  it('removes staff_services links when a staff member or a service is deleted (no FK cascade)', async () => {
+    const { body: svc } = await a
+      .post('/services')
+      .send({ name: 'Tmp', durationMin: 30, price: 0 });
+    const { body: st1 } = await a
+      .post('/staff')
+      .send({ name: 'L1', workingHours: {}, serviceIds: [svc.id, cutId] });
+    const { body: st2 } = await a
+      .post('/staff')
+      .send({ name: 'L2', workingHours: {}, serviceIds: [svc.id] });
+    const links = t.dataSource.getRepository(StaffService);
+
+    await a.delete(`/staff/${st1.id}`).expect(204);
+    expect(await links.countBy({ staffId: st1.id })).toBe(0);
+
+    await a.delete(`/services/${svc.id}`).expect(204);
+    expect(await links.countBy({ serviceId: svc.id })).toBe(0);
+    const remaining = await a.get(`/staff/${st2.id}`).expect(200);
+    expect(remaining.body.serviceIds).toEqual([]);
+    expect(await findOrphans(t.dataSource)).toEqual([]);
   });
 
   it("isolates salons: another salon's staff is invisible and untouchable", async () => {

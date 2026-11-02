@@ -4,15 +4,11 @@ import {
   CreateDateColumn,
   Entity,
   Index,
-  JoinColumn,
-  ManyToOne,
   PrimaryGeneratedColumn,
-  type Relation,
   Unique,
   UpdateDateColumn,
 } from 'typeorm';
 import { DEFAULT_LOCALE, type Locale, SUPPORTED_LOCALES } from '@booking/shared';
-import { Salon } from './salon.entity.js';
 import { sqlIn } from './sql-helpers.js';
 
 @Entity('customers')
@@ -23,13 +19,10 @@ export class Customer {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  /** Implicit relation to salons.id (no FK, BS-70). */
   @Index('IDX_customers_salon_id')
   @Column({ name: 'salon_id', type: 'uuid' })
   salonId: string;
-
-  @ManyToOne(() => Salon, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'salon_id', foreignKeyConstraintName: 'FK_customers_salon' })
-  salon: Relation<Salon>;
 
   @Column({ type: 'varchar', length: 150 })
   name: string;

@@ -1,15 +1,30 @@
 import { randomUUID } from 'node:crypto';
 import type { DataSource } from 'typeorm';
-import { addMinutes, AppointmentStatus, localToUtc, utcToLocal } from '@booking/shared';
+import {
+  addMinutes,
+  AppointmentStatus,
+  localToUtc,
+  MessageChannel,
+  MessageLogStatus,
+  utcToLocal,
+} from '@booking/shared';
 import {
   Appointment,
   Customer,
+  MessageLog,
   ReminderJob,
   Salon,
   Service,
   Staff,
+  StaffService,
 } from '../src/database/entities/index.js';
+import {
+  findOrphans,
+  IMPLICIT_RELATIONS,
+  NON_RELATION_ID_COLUMNS,
+} from '../src/database/implicit-relations.js';
 import { DEMO_SALON_SLUG, seedDemoSalon } from '../src/database/seeds/demo-salon.seed.js';
+import { deleteSalonData } from '../src/salons/salon-deletion.service.js';
 import { createTestDataSource, pgErrorCode } from './utils/test-data-source.js';
 
 const EXPECTED_TABLES = [
@@ -67,8 +82,7 @@ describe('database schema (e2e)', () => {
   });
 
   afterAll(async () => {
-    // ON DELETE CASCADE removes all rows created for this salon.
-    await ds?.getRepository(Salon).delete({ id: salon.id });
+    if (ds) await deleteSalonData(ds.manager, salon.id);
     await ds?.destroy();
   });
 
@@ -85,10 +99,6 @@ describe('database schema (e2e)', () => {
     expect(staff.workingHours).toEqual({});
     expect(staff.isActive).toBe(true);
     expect(customer.noShowCount).toBe(0);
-  });
-
-  it('rejects appointments referencing a missing customer (FK)', async () => {
-    expect(await pgErrorCode(appointment({ customerId: randomUUID() }))).toBe('23503');
   });
 
   it('rejects non-positive service duration and negative price (CHECK)', async () => {
@@ -144,24 +154,40 @@ describe('database schema (e2e)', () => {
     });
   });
 
-  it('still blocks deleting a service or staff member that has appointments', async () => {
-    await appointment();
-    expect(await pgErrorCode(ds.getRepository(Service).delete({ id: service.id }))).toBe('23503');
-    expect(await pgErrorCode(ds.getRepository(Staff).delete({ id: staff.id }))).toBe('23503');
+  it('has no foreign keys: relations are implicit through *_id columns (BS-70)', async () => {
+    const [{ count }] = await ds.query(
+      `SELECT count(*)::int AS count FROM pg_constraint c
+       JOIN pg_namespace n ON n.oid = c.connamespace
+       WHERE c.contype = 'f' AND n.nspname = 'public'`,
+    );
+    expect(count).toBe(0);
   });
 
-  it('deletes a whole salon with appointments in one cascade', async () => {
+  it('registers every *_id column as an implicit relation', async () => {
+    const rows: { table_name: string; column_name: string }[] = await ds.query(
+      `SELECT table_name, column_name FROM information_schema.columns
+       WHERE table_schema = 'public' AND column_name LIKE '%\\_id' ESCAPE '\\'`,
+    );
+    const registered = new Set(IMPLICIT_RELATIONS.map((r) => `${r.table}.${r.column}`));
+    const missing = rows
+      .map((r) => `${r.table_name}.${r.column_name}`)
+      .filter((key) => !registered.has(key) && !NON_RELATION_ID_COLUMNS.includes(key));
+    expect(missing).toEqual([]);
+  });
+
+  it('deletes a whole salon and leaves no orphaned rows', async () => {
     const other = await ds
       .getRepository(Salon)
       .save({ name: 'Doomed', slug: `doomed-${randomUUID()}` });
-    const [st] = await ds.getRepository(Staff).save([{ salonId: other.id, name: 'S' }]);
+    const st = await ds.getRepository(Staff).save({ salonId: other.id, name: 'S' });
     const sv = await ds
       .getRepository(Service)
       .save({ salonId: other.id, name: 'Sv', durationMin: 30 });
+    await ds.getRepository(StaffService).insert({ staffId: st.id, serviceId: sv.id });
     const cu = await ds
       .getRepository(Customer)
       .save({ salonId: other.id, name: 'C', phone: '+84900000999' });
-    await ds.getRepository(Appointment).insert({
+    const { identifiers } = await ds.getRepository(Appointment).insert({
       salonId: other.id,
       staffId: st.id,
       serviceId: sv.id,
@@ -169,21 +195,31 @@ describe('database schema (e2e)', () => {
       startAt: at('2030-01-01T08:00:00Z'),
       endAt: at('2030-01-01T08:30:00Z'),
     });
-    await ds.getRepository(Salon).delete({ id: other.id });
-    expect(await ds.getRepository(Appointment).countBy({ salonId: other.id })).toBe(0);
-  });
-
-  it('cascades reminder jobs when an appointment is deleted', async () => {
-    const { identifiers } = await appointment();
-    const appointmentId = identifiers[0].id as string;
-    await ds.getRepository(ReminderJob).insert({
-      salonId: salon.id,
-      appointmentId,
+    const { identifiers: jobs } = await ds.getRepository(ReminderJob).insert({
+      salonId: other.id,
+      appointmentId: identifiers[0].id as string,
       offsetMinutes: 120,
       sendAt: at('2030-01-01T06:00:00Z'),
     });
-    await ds.getRepository(Appointment).delete({ id: appointmentId });
-    expect(await ds.getRepository(ReminderJob).countBy({ appointmentId })).toBe(0);
+    await ds.getRepository(MessageLog).insert({
+      salonId: other.id,
+      reminderJobId: jobs[0].id as string,
+      channel: MessageChannel.Zns,
+      provider: 'fake',
+      toPhone: cu.phone,
+      status: MessageLogStatus.Success,
+    });
+
+    await deleteSalonData(ds.manager, other.id);
+
+    for (const r of IMPLICIT_RELATIONS.filter((x) => x.column === 'salon_id')) {
+      const [{ count }] = await ds.query(
+        `SELECT count(*)::int AS count FROM "${r.table}" WHERE salon_id = $1`,
+        [other.id],
+      );
+      expect(count, r.table).toBe(0);
+    }
+    expect(await findOrphans(ds)).toEqual([]);
   });
 
   it('round-trips instants unchanged whatever the process timezone is (BS-24)', async () => {
