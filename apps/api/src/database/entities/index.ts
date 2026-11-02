@@ -8,3 +8,5 @@ export * from './service.entity.js';
 export * from './staff-service.entity.js';
 export * from './staff.entity.js';
 export * from './user.entity.js';
+export * from './password-reset-token.entity.js';
+export * from './refresh-token.entity.js';

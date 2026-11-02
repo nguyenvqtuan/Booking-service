@@ -2,6 +2,8 @@ import {
   Appointment,
   Customer,
   MessageLog,
+  PasswordResetToken,
+  RefreshToken,
   ReminderJob,
   ReminderSetting,
   Salon,
@@ -26,4 +28,6 @@ export const ENTITIES = [
   ReminderJob,
   MessageLog,
   ReminderSetting,
+  RefreshToken,
+  PasswordResetToken,
 ];

@@ -13,4 +13,12 @@ export const envValidationSchema = Joi.object({
   DB_NAME: Joi.string().required(),
   DB_SSL: Joi.boolean().truthy('true').falsy('false').default(false),
   DB_LOGGING: Joi.boolean().truthy('true').falsy('false').default(false),
+
+  JWT_ACCESS_SECRET: Joi.string().min(32).required(),
+  JWT_ACCESS_TTL_SEC: Joi.number().integer().min(60).default(900),
+  REFRESH_TOKEN_TTL_DAYS: Joi.number().integer().min(1).default(7),
+  PASSWORD_RESET_TTL_MIN: Joi.number().integer().min(5).default(30),
+  BCRYPT_ROUNDS: Joi.number().integer().min(4).max(15).default(10),
+  COOKIE_SECURE: Joi.boolean().truthy('true').falsy('false').default(false),
+  APP_WEB_URL: Joi.string().uri().default('http://localhost:5173'),
 });

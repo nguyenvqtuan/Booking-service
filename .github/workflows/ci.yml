@@ -41,6 +41,8 @@ jobs:
       DB_USER: booking
       DB_PASSWORD: booking
       DB_NAME: booking
+      JWT_ACCESS_SECRET: ci-only-secret-0123456789abcdef0123456789abcdef
+      BCRYPT_ROUNDS: 4
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
