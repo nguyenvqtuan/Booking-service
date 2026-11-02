@@ -34,4 +34,20 @@ describe('envValidationSchema', () => {
     const { value } = envValidationSchema.validate({ ...base, DB_SSL: 'true' });
     expect(value.DB_SSL).toBe(true);
   });
+
+  it('requires ZNS credentials only when MESSAGE_PROVIDER=live', () => {
+    expect(
+      envValidationSchema.validate({ ...base, MESSAGE_PROVIDER: 'fake' }).error,
+    ).toBeUndefined();
+    const { error } = envValidationSchema.validate({ ...base, MESSAGE_PROVIDER: 'live' });
+    expect(error?.message).toMatch(/ZNS_APP_ID/);
+    const live = {
+      ...base,
+      MESSAGE_PROVIDER: 'live',
+      ZNS_APP_ID: 'a',
+      ZNS_APP_SECRET: 's',
+      ZNS_TEMPLATE_ID_VI: 't',
+    };
+    expect(envValidationSchema.validate(live).error).toBeUndefined();
+  });
 });

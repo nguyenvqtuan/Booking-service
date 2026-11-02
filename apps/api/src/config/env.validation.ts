@@ -21,4 +21,22 @@ export const envValidationSchema = Joi.object({
   BCRYPT_ROUNDS: Joi.number().integer().min(4).max(15).default(10),
   COOKIE_SECURE: Joi.boolean().truthy('true').falsy('false').default(false),
   APP_WEB_URL: Joi.string().uri().default('http://localhost:5173'),
+
+  REDIS_URL: Joi.string()
+    .uri({ scheme: ['redis', 'rediss'] })
+    .default('redis://localhost:6379'),
+  /** Run the reminder dispatch cron in this API instance (BS-27). */
+  REMINDER_CRON_ENABLED: Joi.boolean().truthy('true').falsy('false').default(true),
+  /** Message provider: 'fake' logs messages instead of sending them (dev/tests). */
+  MESSAGE_PROVIDER: Joi.string().valid('fake', 'live').default('fake'),
+
+  // Zalo ZNS (BS-29) — required when MESSAGE_PROVIDER=live.
+  ZNS_API_URL: Joi.string().uri().default('https://business.openapi.zalo.me'),
+  ZNS_OAUTH_URL: Joi.string().uri().default('https://oauth.zaloapp.com'),
+  ZNS_APP_ID: Joi.string().when('MESSAGE_PROVIDER', { is: 'live', then: Joi.required() }),
+  ZNS_APP_SECRET: Joi.string().when('MESSAGE_PROVIDER', { is: 'live', then: Joi.required() }),
+  /** Seeds provider_tokens on first start; later refresh tokens are rotated in the database. */
+  ZNS_REFRESH_TOKEN: Joi.string().optional(),
+  ZNS_TEMPLATE_ID_VI: Joi.string().when('MESSAGE_PROVIDER', { is: 'live', then: Joi.required() }),
+  ZNS_TEMPLATE_ID_EN: Joi.string().optional(),
 });

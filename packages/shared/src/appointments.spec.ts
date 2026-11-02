@@ -51,3 +51,22 @@ describe('appointment schemas', () => {
     ).toBe(false);
   });
 });
+
+describe('reminderSettingsSchema', () => {
+  it('deduplicates and sorts offsets, newest reminder last', async () => {
+    const { reminderSettingsSchema } = await import('./reminders.js');
+    expect(
+      reminderSettingsSchema.parse({ offsets: [120, 1440, 120], fallbackEnabled: true }).offsets,
+    ).toEqual([1440, 120]);
+  });
+
+  it.each([[[1]], [[20_000]], [[60, 120, 180, 240, 300, 360]], [[1.5]]])(
+    'rejects offsets %j',
+    async (offsets) => {
+      const { reminderSettingsSchema } = await import('./reminders.js');
+      expect(reminderSettingsSchema.safeParse({ offsets, fallbackEnabled: true }).success).toBe(
+        false,
+      );
+    },
+  );
+});
