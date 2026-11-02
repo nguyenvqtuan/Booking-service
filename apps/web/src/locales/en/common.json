@@ -14,7 +14,8 @@
   "nav": {
     "overview": "Overview",
     "services": "Services",
-    "staff": "Staff"
+    "staff": "Staff",
+    "customers": "Customers"
   },
   "close": "Close"
 }

@@ -17,6 +17,7 @@ import { sqlIn } from './sql-helpers.js';
 
 @Entity('customers')
 @Unique('UQ_customers_salon_phone', ['salonId', 'phone'])
+@Check('CHK_customers_phone_e164', `"phone" ~ '^\\+[1-9][0-9]{7,14}$'`)
 @Check('CHK_customers_locale', `"locale" IN ${sqlIn(SUPPORTED_LOCALES)}`)
 export class Customer {
   @PrimaryGeneratedColumn('uuid')

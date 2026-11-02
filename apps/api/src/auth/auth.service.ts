@@ -211,6 +211,7 @@ export class AuthService {
       salonId: user.salonId,
       salonName: user.salon.name,
       salonSlug: user.salon.slug,
+      salonTimezone: user.salon.timezone,
     };
   }
 

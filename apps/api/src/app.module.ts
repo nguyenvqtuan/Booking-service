@@ -4,6 +4,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { AppController } from './app.controller.js';
 import { AuthModule } from './auth/auth.module.js';
 import { HttpExceptionFilter } from './common/http-exception.filter.js';
+import { CustomersModule } from './customers/customers.module.js';
 import { ENV_FILE_PATHS } from './config/load-env.js';
 import { envValidationSchema } from './config/env.validation.js';
 import { DatabaseModule } from './database/database.module.js';
@@ -25,6 +26,7 @@ import { StaffModule } from './staff/staff.module.js';
     HealthModule,
     ServicesModule,
     StaffModule,
+    CustomersModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_FILTER, useClass: HttpExceptionFilter }],

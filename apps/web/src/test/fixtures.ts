@@ -11,5 +11,6 @@ export const authResponse = (accessToken: string): AuthResponse => ({
     salonId: 's1',
     salonName: 'Tiệm Mẫu',
     salonSlug: 'tiem-mau',
+    salonTimezone: 'Asia/Ho_Chi_Minh',
   },
 });

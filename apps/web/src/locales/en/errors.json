@@ -8,5 +8,7 @@
   "CONFLICT": "This conflicts with existing data.",
   "fallback": "Something went wrong, please try again.",
   "SERVICE_IN_USE": "This service has appointments and cannot be deleted. Hide it instead.",
-  "STAFF_IN_USE": "This staff member has appointments and cannot be deleted. Deactivate them instead."
+  "STAFF_IN_USE": "This staff member has appointments and cannot be deleted. Deactivate them instead.",
+  "CUSTOMER_PHONE_TAKEN": "This phone number already belongs to another customer.",
+  "CUSTOMER_IN_USE": "This customer has appointments and cannot be deleted."
 }
