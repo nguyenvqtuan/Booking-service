@@ -41,6 +41,8 @@ export interface AuthUser {
   salonId: string;
   salonName: string;
   salonSlug: string;
+  /** IANA timezone of the salon; all wall-clock times are shown in it. */
+  salonTimezone: string;
 }
 
 /** Body of register/login/refresh responses. The refresh token travels in an httpOnly cookie. */

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { normalizePhone } from './phone.js';
 import { type Shift, WEEKDAYS, type WorkingHours } from './working-hours.js';
 
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -31,11 +32,24 @@ export const workingHoursSchema = z
 
 export const staffInputSchema = z.object({
   name: z.string().trim().min(1).max(150),
+  /** Optional; normalized to E.164 when given. */
   phone: z
     .string()
     .trim()
-    .max(20)
-    .transform((v) => v || null)
+    .max(30)
+    .transform((value, ctx) => {
+      if (!value) return null;
+      const e164 = normalizePhone(value);
+      if (!e164) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'Invalid phone number',
+          params: { reason: 'phone' },
+        });
+        return z.NEVER;
+      }
+      return e164;
+    })
     .nullable()
     .optional(),
   workingHours: workingHoursSchema,

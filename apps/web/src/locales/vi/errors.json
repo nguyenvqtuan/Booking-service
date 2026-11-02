@@ -8,5 +8,7 @@
   "CONFLICT": "Dữ liệu bị trùng hoặc xung đột.",
   "fallback": "Có lỗi xảy ra, vui lòng thử lại.",
   "SERVICE_IN_USE": "Dịch vụ đã có lịch hẹn nên không thể xoá. Hãy ẩn dịch vụ thay vì xoá.",
-  "STAFF_IN_USE": "Nhân viên đã có lịch hẹn nên không thể xoá. Hãy chuyển sang ngừng làm."
+  "STAFF_IN_USE": "Nhân viên đã có lịch hẹn nên không thể xoá. Hãy chuyển sang ngừng làm.",
+  "CUSTOMER_PHONE_TAKEN": "Số điện thoại này đã thuộc về khách hàng khác.",
+  "CUSTOMER_IN_USE": "Khách hàng đã có lịch hẹn nên không thể xoá."
 }
