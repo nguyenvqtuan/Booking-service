@@ -10,5 +10,10 @@
   "SERVICE_IN_USE": "Dịch vụ đã có lịch hẹn nên không thể xoá. Hãy ẩn dịch vụ thay vì xoá.",
   "STAFF_IN_USE": "Nhân viên đã có lịch hẹn nên không thể xoá. Hãy chuyển sang ngừng làm.",
   "CUSTOMER_PHONE_TAKEN": "Số điện thoại này đã thuộc về khách hàng khác.",
-  "CUSTOMER_IN_USE": "Khách hàng đã có lịch hẹn nên không thể xoá."
+  "CUSTOMER_IN_USE": "Khách hàng đã có lịch hẹn nên không thể xoá.",
+  "APPOINTMENT_OVERLAP": "Nhân viên đã có lịch hẹn trùng khung giờ này. Vui lòng chọn giờ khác.",
+  "APPOINTMENT_INVALID_TRANSITION": "Không thể chuyển lịch hẹn sang trạng thái này.",
+  "APPOINTMENT_NOT_EDITABLE": "Lịch hẹn đã kết thúc hoặc đã huỷ nên không thể sửa.",
+  "STAFF_CANNOT_PERFORM_SERVICE": "Nhân viên này không làm dịch vụ đã chọn.",
+  "REFERENCE_INACTIVE": "Nhân viên hoặc dịch vụ đã ngừng hoạt động."
 }

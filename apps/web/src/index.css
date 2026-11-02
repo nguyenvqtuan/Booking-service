@@ -363,3 +363,133 @@ a {
 .status-completed {
   color: #1a7f37;
 }
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 8px 0 16px;
+}
+.toolbar input,
+.toolbar select,
+.field select {
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  background: #fff;
+}
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.appointment-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.appointment {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  gap: 4px 12px;
+  align-items: center;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-left: 4px solid #0969da;
+  border-radius: 8px;
+}
+.appointment.status-confirmed {
+  border-left-color: #1a7f37;
+}
+.appointment.status-cancelled,
+.appointment.status-no_show {
+  border-left-color: #cf222e;
+  opacity: 0.7;
+}
+.appointment.status-completed {
+  border-left-color: #8c959f;
+}
+.appointment .row-actions {
+  grid-column: 1 / -1;
+  text-align: left;
+}
+.appointment-time {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 480px) {
+  .appointment {
+    grid-template-columns: 1fr auto;
+  }
+  .appointment-main {
+    grid-column: 1 / -1;
+  }
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 8px 0 16px;
+}
+.toolbar input,
+.toolbar select,
+.field select {
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  background: #fff;
+}
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.appointment-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.appointment {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  gap: 4px 12px;
+  align-items: center;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-left: 4px solid #0969da;
+  border-radius: 8px;
+}
+.appointment.status-confirmed {
+  border-left-color: #1a7f37;
+}
+.appointment.status-cancelled,
+.appointment.status-no_show {
+  border-left-color: #cf222e;
+  opacity: 0.7;
+}
+.appointment.status-completed {
+  border-left-color: #8c959f;
+}
+.appointment .row-actions {
+  grid-column: 1 / -1;
+  text-align: left;
+}
+.appointment-time {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 480px) {
+  .appointment {
+    grid-template-columns: 1fr auto;
+  }
+  .appointment-main {
+    grid-column: 1 / -1;
+  }
+}
