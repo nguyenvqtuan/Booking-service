@@ -1,6 +1,12 @@
 import { envValidationSchema } from './env.validation.js';
 
-const base = { DB_HOST: 'localhost', DB_USER: 'u', DB_PASSWORD: 'p', DB_NAME: 'db' };
+const base = {
+  DB_HOST: 'localhost',
+  DB_USER: 'u',
+  DB_PASSWORD: 'p',
+  DB_NAME: 'db',
+  JWT_ACCESS_SECRET: 'x'.repeat(32),
+};
 
 describe('envValidationSchema', () => {
   it('applies default values', () => {
@@ -17,6 +23,11 @@ describe('envValidationSchema', () => {
   it('fails when DB_HOST is missing', () => {
     const { error } = envValidationSchema.validate({ ...base, DB_HOST: undefined });
     expect(error?.message).toContain('DB_HOST');
+  });
+
+  it('rejects a short JWT secret', () => {
+    const { error } = envValidationSchema.validate({ ...base, JWT_ACCESS_SECRET: 'short' });
+    expect(error?.message).toContain('JWT_ACCESS_SECRET');
   });
 
   it('parses DB_SSL given as a string', () => {
