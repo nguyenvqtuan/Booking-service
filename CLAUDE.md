@@ -3,7 +3,9 @@
 ## Code language
 
 - **All identifiers (variables, functions, classes, files), code comments, log messages and test names must be in English.**
-- User-facing UI copy and seed/demo data may be in Vietnamese (the product targets Vietnamese salons).
+- User-facing UI text lives only in `apps/web/src/locales/{vi,en}/*.json` (i18next, BS-69) — never hard-code
+  it in components; `i18n/locales.test.ts` fails on Vietnamese text outside locale files and on missing keys.
+  Seed/demo data may be in Vietnamese.
 - Docs (README), commit messages and PR descriptions may be in Vietnamese.
 
 ## Conventions

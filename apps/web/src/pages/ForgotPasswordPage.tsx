@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { type ForgotPasswordInput, forgotPasswordSchema } from '@booking/shared';
 import { AuthLayout } from '../components/AuthLayout';
@@ -10,6 +11,7 @@ import { getApiErrorMessage } from '../lib/api-error';
 import { fieldErrorMessage } from '../lib/form-errors';
 
 export function ForgotPasswordPage() {
+  const { t } = useTranslation('auth');
   const [sent, setSent] = useState(false);
   const [submitError, setSubmitError] = useState<string>();
   const {
@@ -29,15 +31,13 @@ export function ForgotPasswordPage() {
   });
 
   return (
-    <AuthLayout title="Quên mật khẩu">
+    <AuthLayout title={t('forgot.title')}>
       {sent ? (
-        <p role="status">
-          Nếu email đã đăng ký, bạn sẽ nhận được liên kết đặt lại mật khẩu trong vài phút.
-        </p>
+        <p role="status">{t('forgot.sent')}</p>
       ) : (
         <form onSubmit={onSubmit} noValidate>
           <FormField
-            label="Email"
+            label={t('fields.email')}
             type="email"
             autoComplete="email"
             error={fieldErrorMessage(errors.email)}
@@ -49,12 +49,12 @@ export function ForgotPasswordPage() {
             </p>
           )}
           <button type="submit" className="btn-primary" disabled={isSubmitting}>
-            Gửi liên kết đặt lại
+            {t('forgot.submit')}
           </button>
         </form>
       )}
       <p className="auth-links">
-        <Link to="/login">Quay lại đăng nhập</Link>
+        <Link to="/login">{t('forgot.backToLogin')}</Link>
       </p>
     </AuthLayout>
   );

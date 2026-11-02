@@ -152,6 +152,43 @@ describe('auth (e2e)', () => {
     });
   });
 
+  describe('profile locale', () => {
+    it('defaults to vi, accepts a locale at registration and can be updated', async () => {
+      const { res } = await register();
+      expect(res.body.user.locale).toBe('vi');
+
+      const en = await http()
+        .post('/auth/register')
+        .send({
+          salonName: 'Salon',
+          fullName: 'Owner',
+          email: newEmail(),
+          password: PASSWORD,
+          locale: 'en',
+        })
+        .expect(201);
+      createdSalonIds.push(en.body.user.salonId);
+      expect(en.body.user.locale).toBe('en');
+
+      const updated = await http()
+        .patch('/auth/me')
+        .set('Authorization', `Bearer ${res.body.accessToken}`)
+        .send({ locale: 'en' })
+        .expect(200);
+      expect(updated.body.locale).toBe('en');
+    });
+
+    it('rejects unsupported locales', async () => {
+      const { res } = await register();
+      const bad = await http()
+        .patch('/auth/me')
+        .set('Authorization', `Bearer ${res.body.accessToken}`)
+        .send({ locale: 'fr' })
+        .expect(400);
+      expect(bad.body.fields.locale).toBeDefined();
+    });
+  });
+
   describe('refresh token rotation', () => {
     it('issues a new access token and rotates the refresh cookie', async () => {
       const { res } = await register();

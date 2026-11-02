@@ -7,6 +7,7 @@ export const authResponse = (accessToken: string): AuthResponse => ({
     id: 'u1',
     email: 'owner@example.com',
     fullName: 'Chủ Tiệm',
+    locale: 'vi',
     salonId: 's1',
     salonName: 'Tiệm Mẫu',
     salonSlug: 'tiem-mau',

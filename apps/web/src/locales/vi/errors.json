@@ -1,0 +1,10 @@
+{
+  "AUTH_INVALID_CREDENTIALS": "Email hoặc mật khẩu không đúng.",
+  "AUTH_EMAIL_TAKEN": "Email này đã được đăng ký.",
+  "AUTH_INVALID_RESET_TOKEN": "Liên kết đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.",
+  "VALIDATION_FAILED": "Dữ liệu chưa hợp lệ, vui lòng kiểm tra lại.",
+  "RATE_LIMITED": "Bạn thao tác quá nhanh, vui lòng thử lại sau.",
+  "NOT_FOUND": "Không tìm thấy dữ liệu.",
+  "CONFLICT": "Dữ liệu bị trùng hoặc xung đột.",
+  "fallback": "Có lỗi xảy ra, vui lòng thử lại."
+}

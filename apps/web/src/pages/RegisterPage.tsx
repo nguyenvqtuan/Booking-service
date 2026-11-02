@@ -1,15 +1,22 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
-import { type RegisterInput, registerSchema } from '@booking/shared';
+import { registerSchema } from '@booking/shared';
+import type { z } from 'zod';
 import { useAuth } from '../auth/auth-context';
 import { AuthLayout } from '../components/AuthLayout';
 import { FormField } from '../components/FormField';
 import { getApiErrorMessage } from '../lib/api-error';
 import { fieldErrorMessage } from '../lib/form-errors';
 
+// The locale is taken from the current UI language, not typed by the user.
+const registerFormSchema = registerSchema.omit({ locale: true });
+type RegisterFormValues = z.infer<typeof registerFormSchema>;
+
 export function RegisterPage() {
+  const { t } = useTranslation('auth');
   const { register: registerAccount } = useAuth();
   const navigate = useNavigate();
   const [submitError, setSubmitError] = useState<string>();
@@ -17,7 +24,7 @@ export function RegisterPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<RegisterInput>({ resolver: zodResolver(registerSchema) });
+  } = useForm<RegisterFormValues>({ resolver: zodResolver(registerFormSchema) });
 
   const onSubmit = handleSubmit(async (values) => {
     setSubmitError(undefined);
@@ -30,29 +37,29 @@ export function RegisterPage() {
   });
 
   return (
-    <AuthLayout title="Đăng ký tiệm">
+    <AuthLayout title={t('register.title')}>
       <form onSubmit={onSubmit} noValidate>
         <FormField
-          label="Tên tiệm"
+          label={t('fields.salonName')}
           autoComplete="organization"
           error={fieldErrorMessage(errors.salonName)}
           {...register('salonName')}
         />
         <FormField
-          label="Họ tên chủ tiệm"
+          label={t('fields.fullName')}
           autoComplete="name"
           error={fieldErrorMessage(errors.fullName)}
           {...register('fullName')}
         />
         <FormField
-          label="Email"
+          label={t('fields.email')}
           type="email"
           autoComplete="email"
           error={fieldErrorMessage(errors.email)}
           {...register('email')}
         />
         <FormField
-          label="Mật khẩu"
+          label={t('fields.password')}
           type="password"
           autoComplete="new-password"
           error={fieldErrorMessage(errors.password, 'password')}
@@ -64,12 +71,12 @@ export function RegisterPage() {
           </p>
         )}
         <button type="submit" className="btn-primary" disabled={isSubmitting}>
-          {isSubmitting ? 'Đang tạo tài khoản…' : 'Đăng ký'}
+          {isSubmitting ? t('register.submitting') : t('register.submit')}
         </button>
       </form>
       <p className="auth-links">
         <span>
-          Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+          {t('register.hasAccount')} <Link to="/login">{t('register.loginLink')}</Link>
         </span>
       </p>
     </AuthLayout>

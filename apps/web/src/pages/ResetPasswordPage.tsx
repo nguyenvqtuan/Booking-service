@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
 import { z } from 'zod';
 import { resetPasswordSchema } from '@booking/shared';
@@ -19,6 +20,7 @@ const formSchema = z
 type FormValues = z.infer<typeof formSchema>;
 
 export function ResetPasswordPage() {
+  const { t } = useTranslation('auth');
   const [params] = useSearchParams();
   const token = params.get('token') ?? '';
   const [done, setDone] = useState(false);
@@ -41,30 +43,30 @@ export function ResetPasswordPage() {
 
   if (!token) {
     return (
-      <AuthLayout title="Đặt lại mật khẩu">
-        <p className="form-error">Liên kết không hợp lệ.</p>
-        <Link to="/forgot-password">Gửi lại liên kết</Link>
+      <AuthLayout title={t('reset.title')}>
+        <p className="form-error">{t('reset.invalidLink')}</p>
+        <Link to="/forgot-password">{t('reset.resendLink')}</Link>
       </AuthLayout>
     );
   }
 
   return (
-    <AuthLayout title="Đặt lại mật khẩu">
+    <AuthLayout title={t('reset.title')}>
       {done ? (
         <p role="status">
-          Đã đổi mật khẩu. <Link to="/login">Đăng nhập</Link>
+          {t('reset.done')} <Link to="/login">{t('reset.loginLink')}</Link>
         </p>
       ) : (
         <form onSubmit={onSubmit} noValidate>
           <FormField
-            label="Mật khẩu mới"
+            label={t('fields.newPassword')}
             type="password"
             autoComplete="new-password"
             error={fieldErrorMessage(errors.password, 'password')}
             {...register('password')}
           />
           <FormField
-            label="Nhập lại mật khẩu"
+            label={t('fields.confirmPassword')}
             type="password"
             autoComplete="new-password"
             error={
@@ -79,7 +81,7 @@ export function ResetPasswordPage() {
             </p>
           )}
           <button type="submit" className="btn-primary" disabled={isSubmitting}>
-            Đổi mật khẩu
+            {t('reset.submit')}
           </button>
         </form>
       )}
