@@ -530,3 +530,22 @@ a {
     font-size: 1.1rem;
   }
 }
+.settings-form {
+  max-width: 560px;
+}
+.custom-offset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.custom-offset input {
+  width: 90px;
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+}
+.form-success {
+  color: #1a7f37;
+}
