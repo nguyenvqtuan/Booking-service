@@ -39,4 +39,15 @@ export const envValidationSchema = Joi.object({
   ZNS_REFRESH_TOKEN: Joi.string().optional(),
   ZNS_TEMPLATE_ID_VI: Joi.string().when('MESSAGE_PROVIDER', { is: 'live', then: Joi.required() }),
   ZNS_TEMPLATE_ID_EN: Joi.string().optional(),
+
+  // SMS brandname via eSMS (BS-30) — required when MESSAGE_PROVIDER=live.
+  SMS_API_URL: Joi.string().uri().default('https://rest.esms.vn/MainService.svc/json'),
+  SMS_API_KEY: Joi.string().when('MESSAGE_PROVIDER', { is: 'live', then: Joi.required() }),
+  SMS_SECRET_KEY: Joi.string().when('MESSAGE_PROVIDER', { is: 'live', then: Joi.required() }),
+  SMS_BRANDNAME: Joi.string().when('MESSAGE_PROVIDER', { is: 'live', then: Joi.required() }),
+  /** Must match the template approved by the carriers; placeholders {salon} {service} {time} {date} {name}. */
+  SMS_TEMPLATE_VI: Joi.string().optional(),
+  SMS_TEMPLATE_EN: Joi.string().optional(),
+  /** eSMS sandbox: requests are validated but no SMS is delivered or charged. */
+  SMS_SANDBOX: Joi.boolean().truthy('true').falsy('false').default(false),
 });

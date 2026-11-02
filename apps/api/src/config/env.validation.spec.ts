@@ -41,12 +41,23 @@ describe('envValidationSchema', () => {
     ).toBeUndefined();
     const { error } = envValidationSchema.validate({ ...base, MESSAGE_PROVIDER: 'live' });
     expect(error?.message).toMatch(/ZNS_APP_ID/);
+    const noSms = {
+      ...base,
+      MESSAGE_PROVIDER: 'live',
+      ZNS_APP_ID: 'a',
+      ZNS_APP_SECRET: 's',
+      ZNS_TEMPLATE_ID_VI: 't',
+    };
+    expect(envValidationSchema.validate(noSms).error?.message).toMatch(/SMS_API_KEY/);
     const live = {
       ...base,
       MESSAGE_PROVIDER: 'live',
       ZNS_APP_ID: 'a',
       ZNS_APP_SECRET: 's',
       ZNS_TEMPLATE_ID_VI: 't',
+      SMS_API_KEY: 'k',
+      SMS_SECRET_KEY: 's',
+      SMS_BRANDNAME: 'BRAND',
     };
     expect(envValidationSchema.validate(live).error).toBeUndefined();
   });
