@@ -28,6 +28,9 @@ export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
     database: env.DB_NAME,
     ssl: toBool(env.DB_SSL) ? { rejectUnauthorized: false } : false,
     logging: toBool(env.DB_LOGGING),
+    // Session timezone is pinned to UTC so SQL date functions never depend on the server zone;
+    // convert to the salon zone explicitly with AT TIME ZONE when needed (BS-24).
+    extra: { options: '-c TimeZone=UTC' },
     // gen_random_uuid() is built into PostgreSQL 13+, so uuid-ossp is not needed.
     uuidExtension: 'pgcrypto',
     entities: ENTITIES,

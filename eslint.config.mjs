@@ -16,6 +16,28 @@ export default tseslint.config(
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       'no-console': ['error', { allow: ['warn', 'error'] }],
+      // BS-24: never use the server/browser local timezone; use the helpers in @booking/shared/time.
+      'no-restricted-properties': [
+        'error',
+        ...[
+          'getHours',
+          'getMinutes',
+          'getDate',
+          'getDay',
+          'getMonth',
+          'getFullYear',
+          'setHours',
+          'setMinutes',
+          'setDate',
+          'setMonth',
+          'setFullYear',
+          'getTimezoneOffset',
+        ].map((property) => ({
+          property,
+          message:
+            'Local-time Date APIs depend on the machine timezone; use @booking/shared time helpers.',
+        })),
+      ],
       // Type-only imports must use `import type` so Node type-stripping / esbuild
       // never keep a runtime import of an interface (breaks ESM migrations).
       '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports' }],
