@@ -16,7 +16,9 @@
     "migration:generate": "pnpm typeorm migration:generate",
     "migration:run": "pnpm typeorm migration:run",
     "migration:revert": "pnpm typeorm migration:revert",
-    "migration:show": "pnpm typeorm migration:show"
+    "migration:show": "pnpm typeorm migration:show",
+    "migration:check": "pnpm typeorm migration:generate src/database/migrations/SchemaDrift --check",
+    "seed": "node --import tsx src/database/seeds/run-seed.ts"
   },
   "dependencies": {
     "@booking/shared": "workspace:*",

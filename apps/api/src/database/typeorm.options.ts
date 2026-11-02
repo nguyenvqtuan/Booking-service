@@ -28,6 +28,8 @@ export function buildDataSourceOptions(env: DbEnv): DataSourceOptions {
     database: env.DB_NAME,
     ssl: toBool(env.DB_SSL) ? { rejectUnauthorized: false } : false,
     logging: toBool(env.DB_LOGGING),
+    // gen_random_uuid() is built into PostgreSQL 13+, so uuid-ossp is not needed.
+    uuidExtension: 'pgcrypto',
     entities: ENTITIES,
     migrations: [join(here, 'migrations', '*.{ts,js}')],
     migrationsTableName: 'migrations',

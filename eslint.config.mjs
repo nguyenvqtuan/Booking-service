@@ -16,11 +16,18 @@ export default tseslint.config(
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       'no-console': ['error', { allow: ['warn', 'error'] }],
+      // Type-only imports must use `import type` so Node type-stripping / esbuild
+      // never keep a runtime import of an interface (breaks ESM migrations).
+      '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports' }],
     },
   },
   {
     files: ['apps/api/**/*.ts', 'packages/shared/**/*.ts'],
-    languageOptions: { globals: { ...globals.node } },
+    languageOptions: {
+      globals: { ...globals.node },
+      // Lets consistent-type-imports keep value imports needed by Nest DI metadata.
+      parserOptions: { emitDecoratorMetadata: true, experimentalDecorators: true },
+    },
   },
   {
     files: ['apps/web/**/*.{ts,tsx}'],
