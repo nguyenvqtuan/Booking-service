@@ -6,5 +6,6 @@
   "RATE_LIMITED": "Bạn thao tác quá nhanh, vui lòng thử lại sau.",
   "NOT_FOUND": "Không tìm thấy dữ liệu.",
   "CONFLICT": "Dữ liệu bị trùng hoặc xung đột.",
-  "fallback": "Có lỗi xảy ra, vui lòng thử lại."
+  "fallback": "Có lỗi xảy ra, vui lòng thử lại.",
+  "SERVICE_IN_USE": "Dịch vụ đã có lịch hẹn nên không thể xoá. Hãy ẩn dịch vụ thay vì xoá."
 }

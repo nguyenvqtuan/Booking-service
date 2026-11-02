@@ -1,0 +1,23 @@
+{
+  "title": "Dịch vụ",
+  "add": "Thêm dịch vụ",
+  "editTitle": "Sửa dịch vụ",
+  "empty": "Chưa có dịch vụ nào. Hãy thêm dịch vụ đầu tiên.",
+  "fields": { "name": "Tên dịch vụ", "durationMin": "Thời lượng (phút)", "price": "Giá (VND)" },
+  "errors": {
+    "durationMin": "Thời lượng phải là số phút lớn hơn 0.",
+    "price": "Giá phải là số không âm."
+  },
+  "minutes_one": "{{count}} phút",
+  "minutes_other": "{{count}} phút",
+  "status": "Trạng thái",
+  "active": "Đang dùng",
+  "hidden": "Đã ẩn",
+  "actions": "Thao tác",
+  "edit": "Sửa",
+  "hide": "Ẩn",
+  "show": "Hiện",
+  "delete": "Xoá",
+  "save": "Lưu",
+  "confirmDelete": "Xoá dịch vụ \"{{name}}\"? Hành động này không thể hoàn tác."
+}

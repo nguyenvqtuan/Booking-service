@@ -8,6 +8,7 @@ import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { ServicesPage } from './pages/services/ServicesPage';
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ export function AppRoutes() {
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route path="/" element={<HomePage />} />
+          <Route path="/services" element={<ServicesPage />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

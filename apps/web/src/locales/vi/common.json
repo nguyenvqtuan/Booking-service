@@ -3,9 +3,17 @@
   "loading": "Đang tải…",
   "logout": "Đăng xuất",
   "language": "Ngôn ngữ",
-  "languages": { "vi": "Tiếng Việt", "en": "English" },
+  "languages": {
+    "vi": "Tiếng Việt",
+    "en": "English"
+  },
   "home": {
     "title": "Tổng quan",
     "greeting": "Xin chào <strong>{{name}}</strong>. Trang đặt lịch công khai của tiệm: <code>/{{slug}}</code>"
-  }
+  },
+  "nav": {
+    "overview": "Tổng quan",
+    "services": "Dịch vụ"
+  },
+  "close": "Đóng"
 }

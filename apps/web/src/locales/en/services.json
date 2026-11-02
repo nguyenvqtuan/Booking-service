@@ -1,0 +1,23 @@
+{
+  "title": "Services",
+  "add": "Add service",
+  "editTitle": "Edit service",
+  "empty": "No services yet. Add your first service.",
+  "fields": { "name": "Service name", "durationMin": "Duration (minutes)", "price": "Price (VND)" },
+  "errors": {
+    "durationMin": "Duration must be a number of minutes greater than 0.",
+    "price": "Price must be a non-negative number."
+  },
+  "minutes_one": "{{count}} minute",
+  "minutes_other": "{{count}} minutes",
+  "status": "Status",
+  "active": "Active",
+  "hidden": "Hidden",
+  "actions": "Actions",
+  "edit": "Edit",
+  "hide": "Hide",
+  "show": "Show",
+  "delete": "Delete",
+  "save": "Save",
+  "confirmDelete": "Delete service \"{{name}}\"? This cannot be undone."
+}

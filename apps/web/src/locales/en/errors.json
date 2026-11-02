@@ -6,5 +6,6 @@
   "RATE_LIMITED": "Too many requests, please try again later.",
   "NOT_FOUND": "Not found.",
   "CONFLICT": "This conflicts with existing data.",
-  "fallback": "Something went wrong, please try again."
+  "fallback": "Something went wrong, please try again.",
+  "SERVICE_IN_USE": "This service has appointments and cannot be deleted. Hide it instead."
 }
