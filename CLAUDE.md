@@ -12,6 +12,11 @@
 - API is ESM: relative imports use the `.js` extension; wrap relation property types in `Relation<>`.
 - TypeORM: explicit column `type` on every column; schema changes only through migrations
   (`pnpm --filter @booking/api migration:generate ...`), and `migration:check` must report no drift.
+- Multi-tenancy: every authenticated handler takes `@CurrentSalon() salonId` and filters every query
+  by it (use `findOwnedOrFail` → 404 for other salons' records). Handlers that intentionally have no
+  salon scope must be marked `@TenantAgnostic('<reason>')`; `test/tenancy.e2e-spec.ts` fails otherwise.
+- API errors are `{ statusCode, code, message, fields? }` with a stable `ErrorCode` from `@booking/shared`;
+  the web app shows messages based on `code`, never on `message`.
 - Times are stored in UTC (`timestamptz`) and converted with the salon timezone (default `Asia/Ho_Chi_Minh`).
 - Tests: Vitest (`*.spec.ts` unit, `test/*.e2e-spec.ts` e2e against a real Postgres).
 - Branch per Jira ticket: `feature/BS-<n>-<slug>`; commit messages reference the ticket, e.g. `feat(api): ... (BS-12)`.
