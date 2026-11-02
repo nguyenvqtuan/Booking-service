@@ -15,8 +15,10 @@ import {
   type ReminderMessage,
   SendOutcome,
   type SendResult,
+  SMS_PROVIDER,
   ZNS_PROVIDER,
 } from '../messaging/message-provider.js';
+import { ReminderSettingsService } from './reminder-settings.service.js';
 
 export type ProcessResult = 'sent' | 'skipped' | 'cancelled' | 'failed';
 
@@ -35,6 +37,8 @@ export class ReminderSender {
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     @Inject(ZNS_PROVIDER) private readonly zns: MessageProvider,
+    @Inject(SMS_PROVIDER) private readonly sms: MessageProvider,
+    private readonly settings: ReminderSettingsService,
   ) {}
 
   async process(reminderJobId: string, now: Date = new Date()): Promise<ProcessResult> {
@@ -53,8 +57,7 @@ export class ReminderSender {
     }
 
     const message = this.buildMessage(context);
-    const result = await this.safeSend(this.zns, message);
-    await this.log(job, this.zns, message.to, result);
+    const result = await this.deliver(job, message);
 
     if (result.outcome === SendOutcome.Success) {
       await this.finish(job.id, ReminderJobStatus.Sent, null);
@@ -62,6 +65,24 @@ export class ReminderSender {
     }
     await this.finish(job.id, ReminderJobStatus.Failed, result.error ?? result.outcome);
     return 'failed';
+  }
+
+  /**
+   * ZNS first; when the customer cannot receive ZNS and the salon enabled the fallback, SMS (BS-31).
+   * Every attempt is logged; the job counts as delivered once, by whichever channel succeeded.
+   */
+  private async deliver(job: ReminderJob, message: ReminderMessage): Promise<SendResult> {
+    const zns = await this.safeSend(this.zns, message);
+    await this.log(job, this.zns, message.to, zns);
+    if (zns.outcome !== SendOutcome.RecipientUnreachable) return zns;
+
+    const { fallbackEnabled } = await this.settings.get(job.salonId);
+    if (!fallbackEnabled) {
+      return { ...zns, error: `${zns.error ?? 'ZNS unreachable'} (SMS fallback disabled)` };
+    }
+    const sms = await this.safeSend(this.sms, message);
+    await this.log(job, this.sms, message.to, sms);
+    return sms;
   }
 
   /** queued/retrying -> sending, atomically; returns null when someone else got it first. */

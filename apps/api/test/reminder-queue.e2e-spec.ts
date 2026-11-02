@@ -4,7 +4,7 @@ import { localToUtc, ReminderJobStatus } from '@booking/shared';
 import { In } from 'typeorm';
 import { MessageLog, ReminderJob } from '../src/database/entities/index.js';
 import { type FakeProvider } from '../src/messaging/fake.provider.js';
-import { ZNS_PROVIDER } from '../src/messaging/message-provider.js';
+import { SendOutcome, SMS_PROVIDER, ZNS_PROVIDER } from '../src/messaging/message-provider.js';
 import type { ReminderQueue } from '../src/queue/queue.module.js';
 import { REMINDER_QUEUE } from '../src/queue/queue.constants.js';
 import { ReminderDispatcher } from '../src/reminders/reminder-dispatcher.service.js';
@@ -25,6 +25,7 @@ describe('reminder queue: dispatcher + worker (e2e)', () => {
   let worker: INestApplicationContext;
   let sender: ReminderSender;
   let zns: FakeProvider;
+  let sms: FakeProvider;
   let ids: { customerId: string; staffId: string; serviceId: string };
   let day = 0;
 
@@ -65,6 +66,7 @@ describe('reminder queue: dispatcher + worker (e2e)', () => {
     await worker.get(ReminderWorker).onApplicationShutdown();
     sender = worker.get(ReminderSender);
     zns = worker.get(ZNS_PROVIDER);
+    sms = worker.get(SMS_PROVIDER);
 
     const svc = (await a.post('/services').send({ name: 'Cắt tóc', durationMin: 30, price: 0 }))
       .body;
@@ -75,7 +77,10 @@ describe('reminder queue: dispatcher + worker (e2e)', () => {
     ids = { customerId: cust.id, staffId: staff.id, serviceId: svc.id };
   });
 
-  beforeEach(() => zns.reset());
+  beforeEach(() => {
+    zns.reset();
+    sms.reset();
+  });
 
   afterAll(async () => {
     await queue?.obliterate({ force: true });
@@ -147,6 +152,71 @@ describe('reminder queue: dispatcher + worker (e2e)', () => {
 
     expect(await sender.process(id)).toBe('cancelled');
     expect(zns.sent).toHaveLength(0);
+  });
+
+  describe('ZNS -> SMS fallback (BS-31, BS-65)', () => {
+    const PHONE = '+84901234567';
+    const logsOf = async (id: string) =>
+      (
+        await t.dataSource
+          .getRepository(MessageLog)
+          .find({ where: { reminderJobId: id }, order: { createdAt: 'ASC' } })
+      ).map((l) => `${l.channel}:${l.status}`);
+    const queuedReminder = async () => {
+      const [id] = await dueReminders();
+      await dispatcher.dispatchDue();
+      return id;
+    };
+
+    afterEach(async () => {
+      await a
+        .put('/reminder-settings')
+        .send({ offsets: [1440, 120], fallbackEnabled: true })
+        .expect(200);
+    });
+
+    it('sends an SMS when the customer cannot receive ZNS, and counts the job once', async () => {
+      const id = await queuedReminder();
+      zns.respondTo(PHONE, SendOutcome.RecipientUnreachable);
+
+      expect(await sender.process(id)).toBe('sent');
+      expect(sms.sent).toHaveLength(1);
+      expect(zns.sent).toHaveLength(0);
+      expect(await logsOf(id)).toEqual(['zns:recipient_unreachable', 'sms:success']);
+      expect((await jobs().findOneByOrFail({ id })).status).toBe(ReminderJobStatus.Sent);
+    });
+
+    it('does not send SMS when the salon disabled the fallback', async () => {
+      await a
+        .put('/reminder-settings')
+        .send({ offsets: [1440, 120], fallbackEnabled: false })
+        .expect(200);
+      const id = await queuedReminder();
+      zns.respondTo(PHONE, SendOutcome.RecipientUnreachable);
+
+      expect(await sender.process(id)).toBe('failed');
+      expect(sms.sent).toHaveLength(0);
+      expect(await logsOf(id)).toEqual(['zns:recipient_unreachable']);
+      expect((await jobs().findOneByOrFail({ id })).lastError).toContain('fallback disabled');
+    });
+
+    it('reports a failure when SMS fails too', async () => {
+      const id = await queuedReminder();
+      zns.respondTo(PHONE, SendOutcome.RecipientUnreachable);
+      sms.respondTo(PHONE, SendOutcome.Permanent);
+
+      expect(await sender.process(id)).toBe('failed');
+      expect(await logsOf(id)).toEqual(['zns:recipient_unreachable', 'sms:permanent']);
+    });
+
+    it('does not fall back on other ZNS errors (e.g. template/config problems)', async () => {
+      const id = await queuedReminder();
+      zns.respondTo(PHONE, SendOutcome.Permanent);
+
+      expect(await sender.process(id)).toBe('failed');
+      expect(sms.sent).toHaveLength(0);
+      expect(await logsOf(id)).toEqual(['zns:permanent']);
+    });
   });
 
   it('puts jobs stuck in "queued" back to pending', async () => {

@@ -5,6 +5,7 @@ import { envValidationSchema } from '../config/env.validation.js';
 import { DatabaseModule } from '../database/database.module.js';
 import { MessagingModule } from '../messaging/messaging.module.js';
 import { ReminderSender } from '../reminders/reminder-sender.service.js';
+import { ReminderSettingsService } from '../reminders/reminder-settings.service.js';
 import { ReminderWorker } from './reminder.worker.js';
 
 /** Everything the reminder worker process needs, without the HTTP API. */
@@ -18,6 +19,6 @@ import { ReminderWorker } from './reminder.worker.js';
     DatabaseModule,
     MessagingModule,
   ],
-  providers: [ReminderSender, ReminderWorker],
+  providers: [ReminderSender, ReminderSettingsService, ReminderWorker],
 })
 export class WorkerModule {}
