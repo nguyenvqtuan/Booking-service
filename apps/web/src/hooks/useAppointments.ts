@@ -9,10 +9,14 @@ import { api } from '../lib/api';
 
 const KEY = ['appointments'] as const;
 
-export function useAppointments(range: { from: string; to: string; staffId?: string }) {
+export function useAppointments(
+  range: { from: string; to: string; staffId?: string },
+  options: { enabled?: boolean } = {},
+) {
   return useQuery({
     queryKey: [...KEY, range],
     queryFn: async () => (await api.get<AppointmentDto[]>('/appointments', { params: range })).data,
+    enabled: options.enabled ?? true,
   });
 }
 

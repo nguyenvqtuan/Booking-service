@@ -13,11 +13,12 @@ import { salonInstant } from '../../lib/salon-time';
 interface Props {
   appointment?: AppointmentDto;
   defaultDate: string;
+  defaultTime?: string;
   onDone(): void;
 }
 
 /** Create or reschedule an appointment. Date/time are entered in the salon timezone. */
-export function AppointmentForm({ appointment, defaultDate, onDone }: Props) {
+export function AppointmentForm({ appointment, defaultDate, defaultTime, onDone }: Props) {
   const { t } = useTranslation(['appointments', 'validation']);
   const { user } = useAuth();
   const tz = user?.salonTimezone;
@@ -33,7 +34,7 @@ export function AppointmentForm({ appointment, defaultDate, onDone }: Props) {
   const [serviceId, setServiceId] = useState(appointment?.serviceId ?? '');
   const [staffId, setStaffId] = useState(appointment?.staffId ?? '');
   const [date, setDate] = useState(initial?.date ?? defaultDate);
-  const [time, setTime] = useState(initial?.time ?? '09:00');
+  const [time, setTime] = useState(initial?.time ?? defaultTime ?? '09:00');
   const [note, setNote] = useState(appointment?.note ?? '');
   const [error, setError] = useState<string>();
   const [submitting, setSubmitting] = useState(false);

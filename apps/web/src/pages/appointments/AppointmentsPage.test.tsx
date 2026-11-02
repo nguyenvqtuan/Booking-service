@@ -88,6 +88,7 @@ describe('AppointmentsPage', () => {
   });
 
   async function openDay() {
+    localStorage.setItem('bs_appointments_view', 'list');
     renderSignedIn('/appointments');
     await screen.findByRole('heading', { name: 'Lịch hẹn' });
     setInput(screen.getByLabelText('Ngày'), '2026-11-02');
