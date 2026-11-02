@@ -22,5 +22,11 @@
   "edit": "Sửa",
   "cancel": "Huỷ lịch",
   "save": "Lưu",
-  "confirmCancel": "Huỷ lịch hẹn này? Khung giờ sẽ được giải phóng."
+  "confirmCancel": "Huỷ lịch hẹn này? Khung giờ sẽ được giải phóng.",
+  "calendar": "Lịch hẹn dạng lịch",
+  "viewMode": "Kiểu hiển thị",
+  "views": {
+    "calendar": "Lịch",
+    "list": "Danh sách"
+  }
 }

@@ -22,5 +22,11 @@
   "edit": "Edit",
   "cancel": "Cancel",
   "save": "Save",
-  "confirmCancel": "Cancel this appointment? The time slot will be freed."
+  "confirmCancel": "Cancel this appointment? The time slot will be freed.",
+  "calendar": "Appointment calendar",
+  "viewMode": "View",
+  "views": {
+    "calendar": "Calendar",
+    "list": "List"
+  }
 }

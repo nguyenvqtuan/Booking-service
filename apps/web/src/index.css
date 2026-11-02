@@ -493,3 +493,40 @@ a {
     grid-column: 1 / -1;
   }
 }
+.segmented {
+  display: inline-flex;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.segmented button {
+  font: inherit;
+  padding: 8px 14px;
+  background: #fff;
+  border: 0;
+  cursor: pointer;
+}
+.segmented button[aria-pressed='true'] {
+  background: #0969da;
+  color: #fff;
+}
+.fc {
+  background: #fff;
+  padding: 8px;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+}
+.fc .status-cancelled,
+.fc .status-no_show {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+@media (max-width: 600px) {
+  .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .fc .fc-toolbar-title {
+    font-size: 1.1rem;
+  }
+}
