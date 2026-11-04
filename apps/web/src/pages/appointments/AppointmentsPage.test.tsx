@@ -151,4 +151,32 @@ describe('AppointmentsPage', () => {
     await userEvent.click(within(row).getByRole('button', { name: 'Huỷ lịch' }));
     await vi.waitFor(() => expect(statusChange).toEqual({ status: 'cancelled' }));
   });
+
+  it('offers no-show only once the appointment has started and asks first', async () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    let called = 0;
+    server.use(
+      http.post(`${API}/appointments/:id/no-show`, () => {
+        called++;
+        return HttpResponse.json({ ...existing, status: 'no_show' });
+      }),
+    );
+    // `existing` starts on 2026-11-02, which is in the past for the test clock.
+    const row = (await openDay()).closest('li')!;
+    await userEvent.click(within(row).getByRole('button', { name: 'Không đến' }));
+    await vi.waitFor(() => expect(called).toBe(1));
+    expect(confirm).toHaveBeenCalled();
+  });
+
+  it('hides no-show for a future appointment', async () => {
+    server.use(
+      http.get(`${API}/appointments`, () =>
+        HttpResponse.json([
+          { ...existing, startAt: '2099-01-01T08:00:00.000Z', endAt: '2099-01-01T08:30:00.000Z' },
+        ]),
+      ),
+    );
+    const row = (await openDay()).closest('li')!;
+    expect(within(row).queryByRole('button', { name: 'Không đến' })).not.toBeInTheDocument();
+  });
 });

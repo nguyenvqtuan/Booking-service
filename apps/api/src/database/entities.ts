@@ -1,8 +1,10 @@
 import {
   Appointment,
+  AppointmentActionToken,
   Customer,
   MessageLog,
   PasswordResetToken,
+  ProviderToken,
   RefreshToken,
   ReminderJob,
   ReminderSetting,
@@ -30,4 +32,6 @@ export const ENTITIES = [
   ReminderSetting,
   RefreshToken,
   PasswordResetToken,
+  ProviderToken,
+  AppointmentActionToken,
 ];
