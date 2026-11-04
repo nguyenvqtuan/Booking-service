@@ -18,5 +18,11 @@
   "success": {
     "title": "Booking confirmed",
     "message": "{{salon}} has received your booking and will remind you before your appointment."
+  },
+  "otp": {
+    "send": "Send verification code",
+    "resend": "Send again",
+    "sent": "Code sent by SMS. It is valid for 5 minutes.",
+    "code": "Verification code (6 digits)"
   }
 }

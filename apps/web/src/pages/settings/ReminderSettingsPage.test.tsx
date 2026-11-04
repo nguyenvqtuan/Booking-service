@@ -7,11 +7,17 @@ import { renderSignedIn } from '../../test/render';
 
 describe('ReminderSettingsPage', () => {
   let saved: unknown;
+  let salonSaved: unknown;
 
   beforeEach(() => {
     setSession(null);
     saved = undefined;
     server.use(
+      http.get(`${API}/salon-settings`, () => HttpResponse.json({ onlineBookingOtp: false })),
+      http.put(`${API}/salon-settings`, async ({ request }) => {
+        salonSaved = await request.json();
+        return HttpResponse.json(salonSaved as object);
+      }),
       http.get(`${API}/reminder-settings`, () =>
         HttpResponse.json({ offsets: [1440, 120], fallbackEnabled: true }),
       ),
@@ -46,5 +52,13 @@ describe('ReminderSettingsPage', () => {
     await userEvent.click(await screen.findByLabelText('Trước 1 ngày'));
     await userEvent.click(screen.getByLabelText('Trước 2 giờ'));
     expect(screen.getByText(/khách sẽ không nhận được tin nhắc/)).toBeInTheDocument();
+  });
+
+  it('toggles phone verification for online booking', async () => {
+    renderSignedIn('/settings/reminders');
+    const toggle = await screen.findByLabelText(/xác thực SĐT/);
+    await vi.waitFor(() => expect(toggle).toBeEnabled());
+    await userEvent.click(toggle);
+    await vi.waitFor(() => expect(salonSaved).toEqual({ onlineBookingOtp: true }));
   });
 });

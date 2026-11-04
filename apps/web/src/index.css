@@ -605,3 +605,13 @@ a {
   gap: 8px;
   margin: 16px 0;
 }
+.otp-block {
+  margin-bottom: 14px;
+}
+.otp-block .field {
+  margin-top: 10px;
+}
+.otp-block p {
+  margin: 8px 0 0;
+  font-size: 0.875rem;
+}

@@ -1,4 +1,15 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import {
   actionSlotsQuerySchema,
   AppointmentStatus,
@@ -14,6 +25,7 @@ import { AppointmentActionsService } from './appointment-actions.service.js';
 
 /** Actions a customer takes from the link in a reminder; the token is the only credential. */
 @Public()
+@UseGuards(ThrottlerGuard)
 @Controller('appointment-actions/:token')
 export class AppointmentActionsController {
   constructor(private readonly actions: AppointmentActionsService) {}

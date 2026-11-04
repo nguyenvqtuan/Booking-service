@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_FILTER } from '@nestjs/core';
 import { AppController } from './app.controller.js';
 import { AppointmentActionsModule } from './appointment-actions/appointment-actions.module.js';
@@ -30,6 +31,10 @@ import { StaffModule } from './staff/staff.module.js';
     }),
     DatabaseModule,
     ScheduleModule.forRoot(),
+    // Per IP and per route, in memory per API instance; applied on public controllers only.
+    ThrottlerModule.forRoot([
+      { ttl: 60_000, limit: () => Number(process.env.PUBLIC_RATE_LIMIT_PER_MIN ?? 60) },
+    ]),
     QueueModule,
     MailModule,
     AuthModule,

@@ -21,5 +21,9 @@
     "limits": "Tối đa {{max}} mốc, từ 5 phút đến 7 ngày.",
     "none": "Chưa chọn mốc nào: khách sẽ không nhận được tin nhắc.",
     "fallback": "Gửi SMS khi khách không nhận được tin Zalo"
+  },
+  "onlineBooking": {
+    "title": "Đặt lịch online",
+    "otp": "Yêu cầu khách xác thực SĐT bằng mã SMS (tốn phí SMS)"
   }
 }

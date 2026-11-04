@@ -16,6 +16,7 @@ import { AppException } from '../common/app.exception.js';
 import { CustomersService } from '../customers/customers.service.js';
 import { Salon, Service, Staff, StaffService } from '../database/entities/index.js';
 import { SlotsService } from '../slots/slots.service.js';
+import { OtpService } from './otp.service.js';
 
 /** Anonymous online booking (BS-35). Salons are resolved by slug; only public fields are exposed. */
 @Injectable()
@@ -25,11 +26,12 @@ export class PublicBookingService {
     private readonly slots: SlotsService,
     private readonly customers: CustomersService,
     private readonly appointments: AppointmentsService,
+    private readonly otp: OtpService,
   ) {}
 
   async salon(slug: string): Promise<PublicSalonDto> {
-    const { name, slug: salonSlug, timezone } = await this.findSalon(slug);
-    return { name, slug: salonSlug, timezone };
+    const { name, slug: salonSlug, timezone, onlineBookingOtp } = await this.findSalon(slug);
+    return { name, slug: salonSlug, timezone, otpRequired: onlineBookingOtp };
   }
 
   async services(slug: string): Promise<PublicServiceDto[]> {
@@ -61,9 +63,16 @@ export class PublicBookingService {
     return this.slots.find(salon.id, query);
   }
 
+  /** Sends a phone verification code when the salon requires one. */
+  async requestOtp(slug: string, phone: string): Promise<void> {
+    const salon = await this.findSalon(slug);
+    await this.otp.request(salon.id, phone);
+  }
+
   async book(slug: string, input: PublicBookingParsed): Promise<PublicBookingResult> {
     const salon = await this.findSalon(slug);
     await this.slots.assertAvailable(salon.id, input);
+    if (salon.onlineBookingOtp) await this.otp.verify(salon.id, input.phone, input.otp);
 
     const customerId = await this.findOrCreateCustomer(salon.id, input);
     const booked = await this.appointments.create(

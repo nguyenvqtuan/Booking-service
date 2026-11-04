@@ -3,6 +3,7 @@ import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router';
 import {
+  ErrorCode,
   normalizePhone,
   type PublicBookingResult,
   type PublicSalonDto,
@@ -14,7 +15,7 @@ import { FormField } from '../../components/FormField';
 import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import { currentLocale } from '../../i18n';
 import { api } from '../../lib/api';
-import { getApiErrorMessage } from '../../lib/api-error';
+import { getApiErrorCode, getApiErrorMessage } from '../../lib/api-error';
 import { formatCurrency, formatDateTime } from '../../lib/format';
 import { salonToday } from '../../lib/salon-time';
 
@@ -55,6 +56,9 @@ function BookingFlow({ slug, salon }: { slug: string; salon: PublicSalonDto }) {
   const [phone, setPhone] = useState('');
   const [phoneError, setPhoneError] = useState<string>();
   const [submitError, setSubmitError] = useState<string>();
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpMessage, setOtpMessage] = useState<string>();
   const [result, setResult] = useState<PublicBookingResult>();
 
   const services = useQuery({
@@ -84,6 +88,7 @@ function BookingFlow({ slug, salon }: { slug: string; salon: PublicSalonDto }) {
           name,
           phone,
           locale: currentLocale(),
+          ...(salon.otpRequired && { otp }),
         })
       ).data,
   });
@@ -100,9 +105,28 @@ function BookingFlow({ slug, salon }: { slug: string; salon: PublicSalonDto }) {
       setResult(await book.mutateAsync());
     } catch (err) {
       setSubmitError(getApiErrorMessage(err));
-      // The chosen time may have just been taken: show what is still free.
-      setStartAt('');
-      await qc.invalidateQueries({ queryKey: ['public', slug, 'slots'] });
+      const code = getApiErrorCode(err);
+      if (code === ErrorCode.SlotUnavailable || code === ErrorCode.AppointmentOverlap) {
+        // The chosen time was just taken: show what is still free.
+        setStartAt('');
+        await qc.invalidateQueries({ queryKey: ['public', slug, 'slots'] });
+      }
+    }
+  };
+
+  const requestOtp = async () => {
+    setOtpMessage(undefined);
+    if (!normalizePhone(phone)) {
+      setPhoneError(t('invalidPhone'));
+      return;
+    }
+    setPhoneError(undefined);
+    try {
+      await api.post(`/public/${slug}/otp`, { phone });
+      setOtpSent(true);
+      setOtpMessage(t('otp.sent'));
+    } catch (err) {
+      setOtpMessage(getApiErrorMessage(err));
     }
   };
 
@@ -220,6 +244,24 @@ function BookingFlow({ slug, salon }: { slug: string; salon: PublicSalonDto }) {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
           />
+          {salon.otpRequired && (
+            <div className="otp-block">
+              <button type="button" className="btn-secondary" onClick={() => void requestOtp()}>
+                {otpSent ? t('otp.resend') : t('otp.send')}
+              </button>
+              {otpMessage && <p role="status">{otpMessage}</p>}
+              {otpSent && (
+                <FormField
+                  label={t('otp.code')}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                />
+              )}
+            </div>
+          )}
         </>
       )}
 
@@ -232,7 +274,12 @@ function BookingFlow({ slug, salon }: { slug: string; salon: PublicSalonDto }) {
         <button
           type="submit"
           className="btn-primary"
-          disabled={book.isPending || !name.trim() || !phone.trim()}
+          disabled={
+            book.isPending ||
+            !name.trim() ||
+            !phone.trim() ||
+            (salon.otpRequired && otp.length !== 6)
+          }
         >
           {t('submit')}
         </button>

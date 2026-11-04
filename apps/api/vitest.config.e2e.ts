@@ -13,6 +13,8 @@ export default defineConfig({
       // Short retry delays so the real BullMQ backoff runs in milliseconds.
       REMINDER_RETRY_DELAYS_MS: '100,100,100',
       MESSAGE_PROVIDER: 'fake',
+      // Suites call public routes many times from one IP; the rate limit test lowers it.
+      PUBLIC_RATE_LIMIT_PER_MIN: '100000',
     },
     fileParallelism: false,
     hookTimeout: 30000,

@@ -41,6 +41,11 @@ export interface MessageProvider {
   send(message: ReminderMessage): Promise<SendResult>;
 }
 
+/** The SMS channel can also send free text, e.g. OTP codes (BS-38). */
+export interface SmsProvider extends MessageProvider {
+  sendText(toE164: string, content: string): Promise<SendResult>;
+}
+
 /** DI tokens for the provider of each channel. */
 export const ZNS_PROVIDER = Symbol('ZNS_PROVIDER');
 export const SMS_PROVIDER = Symbol('SMS_PROVIDER');

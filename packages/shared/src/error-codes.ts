@@ -26,6 +26,10 @@ export const ErrorCode = {
   ReferenceInactive: 'REFERENCE_INACTIVE',
   SlotUnavailable: 'SLOT_UNAVAILABLE',
   ActionTokenInvalid: 'ACTION_TOKEN_INVALID',
+  OtpRequired: 'OTP_REQUIRED',
+  OtpInvalid: 'OTP_INVALID',
+  OtpLocked: 'OTP_LOCKED',
+  OtpCooldown: 'OTP_COOLDOWN',
 } as const;
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 

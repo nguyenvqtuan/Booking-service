@@ -18,5 +18,11 @@
   "success": {
     "title": "Đặt lịch thành công",
     "message": "{{salon}} đã nhận lịch của bạn và sẽ nhắc bạn trước giờ hẹn."
+  },
+  "otp": {
+    "send": "Gửi mã xác thực",
+    "resend": "Gửi lại mã",
+    "sent": "Đã gửi mã qua SMS. Mã có hiệu lực 5 phút.",
+    "code": "Mã xác thực (6 số)"
   }
 }

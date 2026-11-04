@@ -17,5 +17,10 @@
   "STAFF_CANNOT_PERFORM_SERVICE": "Nhân viên này không làm dịch vụ đã chọn.",
   "REFERENCE_INACTIVE": "Nhân viên hoặc dịch vụ đã ngừng hoạt động.",
   "SLOT_UNAVAILABLE": "Giờ này vừa có người đặt. Vui lòng chọn giờ khác.",
-  "ACTION_TOKEN_INVALID": "Liên kết không hợp lệ, đã hết hạn hoặc đã được sử dụng."
+  "ACTION_TOKEN_INVALID": "Liên kết không hợp lệ, đã hết hạn hoặc đã được sử dụng.",
+  "OTP_REQUIRED": "Vui lòng nhập mã xác thực.",
+  "OTP_INVALID": "Mã xác thực không đúng hoặc đã hết hạn.",
+  "OTP_LOCKED": "Nhập sai quá nhiều lần. Vui lòng thử lại sau 15 phút.",
+  "OTP_COOLDOWN": "Vui lòng chờ 1 phút trước khi gửi lại mã.",
+  "SERVICE_UNAVAILABLE": "Dịch vụ tạm thời gián đoạn, vui lòng thử lại."
 }

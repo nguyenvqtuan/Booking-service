@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MessageChannel } from '@booking/shared';
 import {
-  type MessageProvider,
   type ReminderMessage,
   SendOutcome,
+  type SmsProvider,
   type SendResult,
 } from '../message-provider.js';
 import { ESMS_SUCCESS, esmsOutcome } from './esms-errors.js';
@@ -18,7 +18,7 @@ interface EsmsResponse {
 
 /** SMS brandname through eSMS (fallback channel + OTP sender, BS-30/BS-38). */
 @Injectable()
-export class EsmsProvider implements MessageProvider {
+export class EsmsProvider implements SmsProvider {
   readonly channel = MessageChannel.Sms;
   readonly name = 'esms';
 

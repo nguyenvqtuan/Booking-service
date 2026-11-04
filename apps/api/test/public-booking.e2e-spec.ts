@@ -62,7 +62,7 @@ describe('public online booking (e2e)', () => {
 
   it('exposes salon, active services, eligible staff and slots without login', async () => {
     const salon = await http().get(`/public/${slug}`).expect(200);
-    expect(salon.body).toEqual({ name: 'Test Salon', slug, timezone: VN });
+    expect(salon.body).toEqual({ name: 'Test Salon', slug, timezone: VN, otpRequired: false });
 
     const services = await http().get(`/public/${slug}/services`).expect(200);
     expect(services.body.map((s: { name: string }) => s.name)).toEqual(['Cắt tóc']);

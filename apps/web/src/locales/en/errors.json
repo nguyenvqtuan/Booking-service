@@ -17,5 +17,10 @@
   "STAFF_CANNOT_PERFORM_SERVICE": "This staff member does not offer the selected service.",
   "REFERENCE_INACTIVE": "The staff member or service is inactive.",
   "SLOT_UNAVAILABLE": "This time is no longer available. Please choose another time.",
-  "ACTION_TOKEN_INVALID": "This link is invalid, expired or already used."
+  "ACTION_TOKEN_INVALID": "This link is invalid, expired or already used.",
+  "OTP_REQUIRED": "Please enter the verification code.",
+  "OTP_INVALID": "The code is incorrect or has expired.",
+  "OTP_LOCKED": "Too many incorrect attempts. Please try again in 15 minutes.",
+  "OTP_COOLDOWN": "Please wait 1 minute before requesting a new code.",
+  "SERVICE_UNAVAILABLE": "Service temporarily unavailable, please try again."
 }

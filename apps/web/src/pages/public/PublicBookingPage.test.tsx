@@ -34,7 +34,12 @@ describe('PublicBookingPage', () => {
     server.use(
       http.post(`${API}/auth/refresh`, () => HttpResponse.json({}, { status: 401 })),
       http.get(`${API}/public/tiem-a`, () =>
-        HttpResponse.json({ name: 'Tiệm A', slug: 'tiem-a', timezone: 'Asia/Ho_Chi_Minh' }),
+        HttpResponse.json({
+          name: 'Tiệm A',
+          slug: 'tiem-a',
+          timezone: 'Asia/Ho_Chi_Minh',
+          otpRequired: false,
+        }),
       ),
       http.get(`${API}/public/tiem-a/services`, () =>
         HttpResponse.json([{ id: SERVICE, name: 'Cắt tóc', durationMin: 30, price: 100000 }]),
@@ -116,5 +121,61 @@ describe('PublicBookingPage', () => {
     server.use(http.get(`${API}/public/khong-co`, () => HttpResponse.json({}, { status: 404 })));
     renderPage('/khong-co');
     expect(await screen.findByText(/Không tìm thấy tiệm/)).toBeInTheDocument();
+  });
+
+  it('asks for an SMS code when the salon requires it', async () => {
+    let otpBody: unknown;
+    server.use(
+      http.get(`${API}/public/tiem-a`, () =>
+        HttpResponse.json({
+          name: 'Tiệm A',
+          slug: 'tiem-a',
+          timezone: 'Asia/Ho_Chi_Minh',
+          otpRequired: true,
+        }),
+      ),
+      http.post(`${API}/public/tiem-a/otp`, async ({ request }) => {
+        otpBody = await request.json();
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    await chooseSlot();
+    await userEvent.type(screen.getByLabelText('Họ tên'), 'Lan');
+    await userEvent.type(screen.getByLabelText('Số điện thoại'), '0912345678');
+    expect(screen.getByRole('button', { name: 'Đặt lịch' })).toBeDisabled();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Gửi mã xác thực' }));
+    await userEvent.type(await screen.findByLabelText('Mã xác thực (6 số)'), '123456');
+    await userEvent.click(screen.getByRole('button', { name: 'Đặt lịch' }));
+
+    await screen.findByRole('heading', { name: 'Đặt lịch thành công' });
+    expect(otpBody).toEqual({ phone: '0912345678' });
+    expect(posted).toMatchObject({ otp: '123456' });
+  });
+
+  it('keeps the chosen time when the code is wrong', async () => {
+    server.use(
+      http.get(`${API}/public/tiem-a`, () =>
+        HttpResponse.json({
+          name: 'Tiệm A',
+          slug: 'tiem-a',
+          timezone: 'Asia/Ho_Chi_Minh',
+          otpRequired: true,
+        }),
+      ),
+      http.post(`${API}/public/tiem-a/otp`, () => new HttpResponse(null, { status: 204 })),
+      http.post(`${API}/public/tiem-a/appointments`, () =>
+        HttpResponse.json({ statusCode: 400, code: 'OTP_INVALID', message: 'x' }, { status: 400 }),
+      ),
+    );
+    await chooseSlot();
+    await userEvent.type(screen.getByLabelText('Họ tên'), 'Lan');
+    await userEvent.type(screen.getByLabelText('Số điện thoại'), '0912345678');
+    await userEvent.click(screen.getByRole('button', { name: 'Gửi mã xác thực' }));
+    await userEvent.type(await screen.findByLabelText('Mã xác thực (6 số)'), '000000');
+    await userEvent.click(screen.getByRole('button', { name: 'Đặt lịch' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Mã xác thực không đúng');
+    expect(screen.getByRole('button', { name: '09:00' })).toHaveAttribute('aria-pressed', 'true');
   });
 });

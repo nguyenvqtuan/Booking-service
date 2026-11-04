@@ -1,5 +1,18 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import {
+  type OtpRequestParsed,
+  otpRequestSchema,
   publicBookingSchema,
   type PublicBookingParsed,
   type PublicBookingResult,
@@ -16,6 +29,7 @@ import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
 import { PublicBookingService } from './public-booking.service.js';
 
 @Public()
+@UseGuards(ThrottlerGuard)
 @Controller('public/:slug')
 export class PublicBookingController {
   constructor(private readonly booking: PublicBookingService) {}
@@ -45,6 +59,15 @@ export class PublicBookingController {
     @Query(new ZodValidationPipe(slotQuerySchema)) query: z.output<typeof slotQuerySchema>,
   ): Promise<SlotDto[]> {
     return this.booking.freeSlots(slug, query);
+  }
+
+  @Post('otp')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  requestOtp(
+    @Param('slug') slug: string,
+    @Body(new ZodValidationPipe(otpRequestSchema)) body: OtpRequestParsed,
+  ): Promise<void> {
+    return this.booking.requestOtp(slug, body.phone);
   }
 
   @Post('appointments')

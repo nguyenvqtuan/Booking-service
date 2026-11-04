@@ -1,12 +1,15 @@
 import { type FormEvent, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   type ReminderSettingsDto,
+  type SalonSettingsDto,
   REMINDER_MAX_OFFSET_MIN,
   REMINDER_MAX_OFFSETS,
   REMINDER_MIN_OFFSET_MIN,
 } from '@booking/shared';
 import { useReminderSettings, useSaveReminderSettings } from '../../hooks/useReminderSettings';
+import { api } from '../../lib/api';
 import { getApiErrorMessage } from '../../lib/api-error';
 
 const PRESETS = [2880, 1440, 240, 120, 60, 30];
@@ -15,7 +18,40 @@ export function ReminderSettingsPage() {
   const { t } = useTranslation('common');
   const { data } = useReminderSettings();
   if (!data) return <p role="status">{t('loading')}</p>;
-  return <ReminderSettingsForm initial={data} />;
+  return (
+    <>
+      <ReminderSettingsForm initial={data} />
+      <OnlineBookingSettings />
+    </>
+  );
+}
+
+function OnlineBookingSettings() {
+  const { t } = useTranslation('settings');
+  const qc = useQueryClient();
+  const { data } = useQuery({
+    queryKey: ['salon-settings'],
+    queryFn: async () => (await api.get<SalonSettingsDto>('/salon-settings')).data,
+  });
+  const save = useMutation({
+    mutationFn: async (input: SalonSettingsDto) =>
+      (await api.put<SalonSettingsDto>('/salon-settings', input)).data,
+    onSuccess: (saved) => qc.setQueryData(['salon-settings'], saved),
+  });
+  return (
+    <section className="settings-form">
+      <h2>{t('onlineBooking.title')}</h2>
+      <label className="checkbox">
+        <input
+          type="checkbox"
+          checked={data?.onlineBookingOtp ?? false}
+          disabled={!data || save.isPending}
+          onChange={(e) => save.mutate({ onlineBookingOtp: e.target.checked })}
+        />
+        {t('onlineBooking.otp')}
+      </label>
+    </section>
+  );
 }
 
 function ReminderSettingsForm({ initial }: { initial: ReminderSettingsDto }) {

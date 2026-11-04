@@ -27,9 +27,21 @@ export const publicBookingSchema = z.object({
   name: z.string().trim().min(1).max(150),
   phone: phoneSchema,
   locale: localeSchema.optional(),
+  /** Required when the salon enabled phone verification (BS-38). */
+  otp: z
+    .string()
+    .regex(/^\d{6}$/)
+    .optional(),
 });
 export type PublicBookingInput = z.input<typeof publicBookingSchema>;
 export type PublicBookingParsed = z.output<typeof publicBookingSchema>;
+
+export const otpRequestSchema = z.object({ phone: phoneSchema });
+export type OtpRequest = z.input<typeof otpRequestSchema>;
+export type OtpRequestParsed = z.output<typeof otpRequestSchema>;
+
+export const salonSettingsSchema = z.object({ onlineBookingOtp: z.boolean() });
+export type SalonSettingsDto = z.infer<typeof salonSettingsSchema>;
 
 export const publicStaffQuerySchema = z.object({ serviceId: z.uuid().optional() });
 
@@ -37,6 +49,8 @@ export interface PublicSalonDto {
   name: string;
   slug: string;
   timezone: string;
+  /** The customer must verify their phone with an SMS code before booking. */
+  otpRequired: boolean;
 }
 
 export interface PublicServiceDto {

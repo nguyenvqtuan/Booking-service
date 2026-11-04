@@ -22,6 +22,8 @@ export const envValidationSchema = Joi.object({
   COOKIE_SECURE: Joi.boolean().truthy('true').falsy('false').default(false),
   APP_WEB_URL: Joi.string().uri().default('http://localhost:5173'),
 
+  /** Reverse proxies in front of the API; needed so rate limiting sees the real client IP. */
+  TRUST_PROXY_HOPS: Joi.number().integer().min(0).default(0),
   REDIS_URL: Joi.string()
     .uri({ scheme: ['redis', 'rediss'] })
     .default('redis://localhost:6379'),
@@ -52,6 +54,8 @@ export const envValidationSchema = Joi.object({
   /** Must match the template approved by the carriers; placeholders {salon} {service} {time} {date} {name}. */
   SMS_TEMPLATE_VI: Joi.string().optional(),
   SMS_TEMPLATE_EN: Joi.string().optional(),
+  /** Approved OTP template; placeholder {code}. */
+  SMS_OTP_TEMPLATE: Joi.string().optional(),
   /** eSMS sandbox: requests are validated but no SMS is delivered or charged. */
   SMS_SANDBOX: Joi.boolean().truthy('true').falsy('false').default(false),
 });

@@ -1,7 +1,9 @@
 import { Global, Inject, Module, type OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
+import { Redis } from 'ioredis';
 import {
+  REDIS_CLIENT,
   REMINDER_QUEUE,
   REMINDER_QUEUE_NAME,
   type ReminderQueuePayload,
@@ -14,6 +16,11 @@ export type ReminderQueue = Queue<ReminderQueuePayload>;
 @Module({
   providers: [
     {
+      provide: REDIS_CLIENT,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => createRedis(config.getOrThrow<string>('REDIS_URL')),
+    },
+    {
       provide: REMINDER_QUEUE,
       inject: [ConfigService],
       useFactory: (config: ConfigService): ReminderQueue =>
@@ -25,12 +32,16 @@ export type ReminderQueue = Queue<ReminderQueuePayload>;
         }),
     },
   ],
-  exports: [REMINDER_QUEUE],
+  exports: [REMINDER_QUEUE, REDIS_CLIENT],
 })
 export class QueueModule implements OnApplicationShutdown {
-  constructor(@Inject(REMINDER_QUEUE) private readonly queue: ReminderQueue) {}
+  constructor(
+    @Inject(REMINDER_QUEUE) private readonly queue: ReminderQueue,
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
+  ) {}
 
   async onApplicationShutdown(): Promise<void> {
     await this.queue.close();
+    await this.redis.quit();
   }
 }
