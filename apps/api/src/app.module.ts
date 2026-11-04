@@ -12,6 +12,7 @@ import { envValidationSchema } from './config/env.validation.js';
 import { DatabaseModule } from './database/database.module.js';
 import { HealthModule } from './health/health.module.js';
 import { MailModule } from './mail/mail.module.js';
+import { PublicBookingModule } from './public-booking/public-booking.module.js';
 import { QueueModule } from './queue/queue.module.js';
 import { RemindersModule } from './reminders/reminders.module.js';
 import { SalonsModule } from './salons/salons.module.js';
@@ -39,6 +40,7 @@ import { StaffModule } from './staff/staff.module.js';
     AppointmentsModule,
     RemindersModule,
     SlotsModule,
+    PublicBookingModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_FILTER, useClass: HttpExceptionFilter }],

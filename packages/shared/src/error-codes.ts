@@ -24,6 +24,7 @@ export const ErrorCode = {
   AppointmentNotEditable: 'APPOINTMENT_NOT_EDITABLE',
   StaffCannotPerformService: 'STAFF_CANNOT_PERFORM_SERVICE',
   ReferenceInactive: 'REFERENCE_INACTIVE',
+  SlotUnavailable: 'SLOT_UNAVAILABLE',
 } as const;
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 

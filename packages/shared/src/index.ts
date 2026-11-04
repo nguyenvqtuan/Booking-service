@@ -5,6 +5,7 @@ export * from './enums.js';
 export * from './error-codes.js';
 export * from './locale.js';
 export * from './phone.js';
+export * from './public-booking.js';
 export * from './reminders.js';
 export * from './services.js';
 export * from './slots.js';

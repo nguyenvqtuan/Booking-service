@@ -1,5 +1,6 @@
 import enAppointments from '../locales/en/appointments.json';
 import enAuth from '../locales/en/auth.json';
+import enBooking from '../locales/en/booking.json';
 import enCommon from '../locales/en/common.json';
 import enCustomers from '../locales/en/customers.json';
 import enErrors from '../locales/en/errors.json';
@@ -9,6 +10,7 @@ import enStaff from '../locales/en/staff.json';
 import enValidation from '../locales/en/validation.json';
 import viAppointments from '../locales/vi/appointments.json';
 import viAuth from '../locales/vi/auth.json';
+import viBooking from '../locales/vi/booking.json';
 import viCommon from '../locales/vi/common.json';
 import viCustomers from '../locales/vi/customers.json';
 import viErrors from '../locales/vi/errors.json';
@@ -28,6 +30,7 @@ export const resources = {
     customers: viCustomers,
     appointments: viAppointments,
     settings: viSettings,
+    booking: viBooking,
   },
   en: {
     common: enCommon,
@@ -39,6 +42,7 @@ export const resources = {
     customers: enCustomers,
     appointments: enAppointments,
     settings: enSettings,
+    booking: enBooking,
   },
 } as const;
 
@@ -52,4 +56,5 @@ export const NAMESPACES = [
   'customers',
   'appointments',
   'settings',
+  'booking',
 ] as const;

@@ -30,6 +30,10 @@ const StaffPage = lazy(() =>
   import('./pages/staff/StaffPage').then((m) => ({ default: m.StaffPage })),
 );
 
+const PublicBookingPage = lazy(() =>
+  import('./pages/public/PublicBookingPage').then((m) => ({ default: m.PublicBookingPage })),
+);
+
 const queryClient = new QueryClient();
 
 function PageFallback() {
@@ -58,6 +62,8 @@ export function AppRoutes() {
             <Route path="/settings/reminders" element={<ReminderSettingsPage />} />
           </Route>
         </Route>
+        {/* Static routes above win; salon slugs cannot clash with them (RESERVED_SLUGS). */}
+        <Route path="/:salonSlug" element={<PublicBookingPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
