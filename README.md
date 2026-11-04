@@ -29,6 +29,17 @@ pnpm db:up                  # PostgreSQL + Redis
 pnpm dev                    # web :5173 + api :3000 (+ shared watch)
 ```
 
+## Worker gửi nhắc hẹn (BS-27)
+
+Cron trong API (mỗi phút) đưa các `reminder_jobs` đến hạn vào hàng đợi BullMQ (Redis); worker là
+process riêng, tiêu thụ hàng đợi và gửi tin (ZNS/SMS). Ở dev, `MESSAGE_PROVIDER=fake` chỉ ghi log.
+
+```bash
+pnpm dev                                      # API (đã gồm cron) + web
+pnpm --filter @booking/api dev:worker         # worker (chạy từ dist do `nest start --watch` biên dịch)
+pnpm --filter @booking/api start:worker       # production
+```
+
 ## Lệnh thường dùng
 
 | Lệnh             | Tác dụng                             |
