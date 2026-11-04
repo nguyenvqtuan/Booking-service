@@ -23,6 +23,8 @@ export interface ReminderMessage {
     time: string;
     /** Salon-local "YYYY-MM-DD". */
     date: string;
+    /** Link to confirm, cancel or reschedule the appointment (BS-37). */
+    actionUrl?: string;
   };
 }
 

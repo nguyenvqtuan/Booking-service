@@ -1,3 +1,4 @@
+export * from './appointment-actions.js';
 export * from './appointments.js';
 export * from './auth.js';
 export * from './customers.js';

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ActionTokenService } from '../appointment-actions/action-token.service.js';
 import { ENV_FILE_PATHS } from '../config/load-env.js';
 import { envValidationSchema } from '../config/env.validation.js';
 import { DatabaseModule } from '../database/database.module.js';
@@ -19,6 +20,6 @@ import { ReminderWorker } from './reminder.worker.js';
     DatabaseModule,
     MessagingModule,
   ],
-  providers: [ReminderSender, ReminderSettingsService, ReminderWorker],
+  providers: [ActionTokenService, ReminderSender, ReminderSettingsService, ReminderWorker],
 })
 export class WorkerModule {}

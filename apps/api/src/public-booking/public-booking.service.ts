@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, In } from 'typeorm';
 import {
@@ -10,7 +10,6 @@ import {
   type PublicServiceDto,
   type PublicStaffDto,
   type SlotDto,
-  utcToLocal,
 } from '@booking/shared';
 import { AppointmentsService } from '../appointments/appointments.service.js';
 import { AppException } from '../common/app.exception.js';
@@ -64,7 +63,7 @@ export class PublicBookingService {
 
   async book(slug: string, input: PublicBookingParsed): Promise<PublicBookingResult> {
     const salon = await this.findSalon(slug);
-    await this.assertSlotAvailable(salon, input);
+    await this.slots.assertAvailable(salon.id, input);
 
     const customerId = await this.findOrCreateCustomer(salon.id, input);
     const booked = await this.appointments.create(
@@ -79,24 +78,6 @@ export class PublicBookingService {
       startAt: booked.startAt,
       endAt: booked.endAt,
     };
-  }
-
-  /** Visitors may only book a time the salon offers (working hours, not past, not taken). */
-  private async assertSlotAvailable(salon: Salon, input: PublicBookingParsed): Promise<void> {
-    const startAt = new Date(input.startAt);
-    const { date } = utcToLocal(startAt, salon.timezone);
-    const free = await this.slots.find(salon.id, {
-      staffId: input.staffId,
-      serviceId: input.serviceId,
-      date,
-    });
-    if (!free.some((slot) => new Date(slot.startAt).getTime() === startAt.getTime())) {
-      throw new AppException(
-        HttpStatus.CONFLICT,
-        ErrorCode.SlotUnavailable,
-        'This time is no longer available',
-      );
-    }
   }
 
   /** An existing customer keeps their stored name: anonymous input must not overwrite data. */

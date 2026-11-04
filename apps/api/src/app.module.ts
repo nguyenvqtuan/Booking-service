@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_FILTER } from '@nestjs/core';
 import { AppController } from './app.controller.js';
+import { AppointmentActionsModule } from './appointment-actions/appointment-actions.module.js';
 import { AppointmentsModule } from './appointments/appointments.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { HttpExceptionFilter } from './common/http-exception.filter.js';
@@ -41,6 +42,7 @@ import { StaffModule } from './staff/staff.module.js';
     RemindersModule,
     SlotsModule,
     PublicBookingModule,
+    AppointmentActionsModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_FILTER, useClass: HttpExceptionFilter }],

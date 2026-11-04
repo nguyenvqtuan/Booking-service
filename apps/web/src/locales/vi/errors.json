@@ -16,5 +16,6 @@
   "APPOINTMENT_NOT_EDITABLE": "Lịch hẹn đã kết thúc hoặc đã huỷ nên không thể sửa.",
   "STAFF_CANNOT_PERFORM_SERVICE": "Nhân viên này không làm dịch vụ đã chọn.",
   "REFERENCE_INACTIVE": "Nhân viên hoặc dịch vụ đã ngừng hoạt động.",
-  "SLOT_UNAVAILABLE": "Giờ này vừa có người đặt. Vui lòng chọn giờ khác."
+  "SLOT_UNAVAILABLE": "Giờ này vừa có người đặt. Vui lòng chọn giờ khác.",
+  "ACTION_TOKEN_INVALID": "Liên kết không hợp lệ, đã hết hạn hoặc đã được sử dụng."
 }

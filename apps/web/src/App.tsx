@@ -30,6 +30,11 @@ const StaffPage = lazy(() =>
   import('./pages/staff/StaffPage').then((m) => ({ default: m.StaffPage })),
 );
 
+const AppointmentActionPage = lazy(() =>
+  import('./pages/public/AppointmentActionPage').then((m) => ({
+    default: m.AppointmentActionPage,
+  })),
+);
 const PublicBookingPage = lazy(() =>
   import('./pages/public/PublicBookingPage').then((m) => ({ default: m.PublicBookingPage })),
 );
@@ -63,6 +68,7 @@ export function AppRoutes() {
           </Route>
         </Route>
         {/* Static routes above win; salon slugs cannot clash with them (RESERVED_SLUGS). */}
+        <Route path="/appointment/:token" element={<AppointmentActionPage />} />
         <Route path="/:salonSlug" element={<PublicBookingPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -69,6 +69,7 @@ export class ZnsProvider implements MessageProvider {
             service_name: message.params.serviceName,
             time: message.params.time,
             date: message.params.date,
+            action_url: message.params.actionUrl,
           },
         }),
         signal: AbortSignal.timeout(15_000),

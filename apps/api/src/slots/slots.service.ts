@@ -1,12 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, In, LessThan, MoreThan } from 'typeorm';
+import { DataSource, In, LessThan, MoreThan, Not } from 'typeorm';
 import {
   ACTIVE_APPOINTMENT_STATUSES,
   computeSlots,
+  ErrorCode,
   localDayRangeUtc,
   type SlotDto,
+  utcToLocal,
 } from '@booking/shared';
+import { AppException } from '../common/app.exception.js';
 import { Appointment, Salon, Service, Staff, StaffService } from '../database/entities/index.js';
 import { findOwnedOrFail } from '../tenancy/index.js';
 
@@ -17,7 +20,7 @@ export class SlotsService {
   /** Free start times of a staff member for a service on one salon-local day (BS-36). */
   async find(
     salonId: string,
-    query: { staffId: string; serviceId: string; date: string },
+    query: { staffId: string; serviceId: string; date: string; excludeAppointmentId?: string },
     now: Date = new Date(),
   ): Promise<SlotDto[]> {
     const em = this.dataSource.manager;
@@ -36,6 +39,7 @@ export class SlotsService {
       status: In([...ACTIVE_APPOINTMENT_STATUSES]),
       startAt: LessThan(to),
       endAt: MoreThan(from),
+      ...(query.excludeAppointmentId && { id: Not(query.excludeAppointmentId) }),
     });
 
     return computeSlots({
@@ -46,5 +50,27 @@ export class SlotsService {
       timeZone: timezone,
       now,
     });
+  }
+
+  /** Customers may only choose a time the salon offers (working hours, not past, not taken). */
+  async assertAvailable(
+    salonId: string,
+    input: { staffId: string; serviceId: string; startAt: string; excludeAppointmentId?: string },
+  ): Promise<void> {
+    const startAt = new Date(input.startAt);
+    const { timezone } = await this.dataSource.manager.findOneByOrFail(Salon, { id: salonId });
+    const free = await this.find(salonId, {
+      staffId: input.staffId,
+      serviceId: input.serviceId,
+      date: utcToLocal(startAt, timezone).date,
+      excludeAppointmentId: input.excludeAppointmentId,
+    });
+    if (!free.some((slot) => new Date(slot.startAt).getTime() === startAt.getTime())) {
+      throw new AppException(
+        HttpStatus.CONFLICT,
+        ErrorCode.SlotUnavailable,
+        'This time is not available',
+      );
+    }
   }
 }

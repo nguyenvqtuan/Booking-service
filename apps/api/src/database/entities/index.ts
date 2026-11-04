@@ -1,3 +1,4 @@
+export * from './appointment-action-token.entity.js';
 export * from './appointment.entity.js';
 export * from './customer.entity.js';
 export * from './message-log.entity.js';

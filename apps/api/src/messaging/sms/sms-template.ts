@@ -25,6 +25,7 @@ export function renderSms(template: string, message: ReminderMessage): string {
     name: params.customerName,
     time: params.time,
     date: displayDate(params.date, locale),
+    link: params.actionUrl ?? '',
   };
   const text = template.replace(/\{(\w+)\}/g, (match, key: string) => values[key] ?? match);
   return stripDiacritics(text);

@@ -1,7 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectDataSource } from '@nestjs/typeorm';
 import type { DataSource, EntityManager } from 'typeorm';
 import { isActiveStatus, MessageLogStatus, ReminderJobStatus, utcToLocal } from '@booking/shared';
+import { ActionTokenService } from '../appointment-actions/action-token.service.js';
 import {
   Appointment,
   Customer,
@@ -46,6 +48,8 @@ export class ReminderSender {
     @Inject(ZNS_PROVIDER) private readonly zns: MessageProvider,
     @Inject(SMS_PROVIDER) private readonly sms: MessageProvider,
     private readonly settings: ReminderSettingsService,
+    private readonly actionTokens: ActionTokenService,
+    private readonly config: ConfigService,
   ) {}
 
   async process(reminderJobId: string, options: ProcessOptions = {}): Promise<ProcessResult> {
@@ -64,7 +68,7 @@ export class ReminderSender {
       return 'cancelled';
     }
 
-    const message = this.buildMessage(context);
+    const message = this.buildMessage(context, await this.actionUrl(context.appointment));
     const { result, provider } = await this.deliver(job, message);
 
     if (result.outcome === SendOutcome.Success) {
@@ -152,8 +156,14 @@ export class ReminderSender {
     return { appointment, customer, service, salon };
   }
 
+  private async actionUrl(appointment: Appointment): Promise<string> {
+    const token = await this.actionTokens.issue(appointment);
+    return `${this.config.getOrThrow<string>('APP_WEB_URL')}/appointment/${token}`;
+  }
+
   private buildMessage(
     ctx: NonNullable<Awaited<ReturnType<ReminderSender['loadContext']>>>,
+    actionUrl: string,
   ): ReminderMessage {
     const local = utcToLocal(ctx.appointment.startAt, ctx.salon.timezone);
     return {
@@ -165,6 +175,7 @@ export class ReminderSender {
         serviceName: ctx.service.name,
         time: local.time,
         date: local.date,
+        actionUrl,
       },
     };
   }
