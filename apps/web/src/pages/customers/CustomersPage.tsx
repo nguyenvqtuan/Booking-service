@@ -74,7 +74,7 @@ export function CustomersPage() {
       {!!data?.items.length && (
         <>
           <div className="table-wrap">
-            <table className="data-table">
+            <table className="data-table data-table-cards">
               <thead>
                 <tr>
                   <th>{t('fields.name')}</th>
@@ -85,7 +85,7 @@ export function CustomersPage() {
               <tbody>
                 {data.items.map((c) => (
                   <tr key={c.id}>
-                    <td>
+                    <td data-label={t('fields.name')}>
                       <button
                         type="button"
                         className="btn-link"
@@ -95,7 +95,7 @@ export function CustomersPage() {
                       </button>
                       <NoShowBadge count={c.noShowCount} />
                     </td>
-                    <td>{formatPhone(c.phone)}</td>
+                    <td data-label={t('fields.phone')}>{formatPhone(c.phone)}</td>
                     <td className="row-actions">
                       <button
                         type="button"

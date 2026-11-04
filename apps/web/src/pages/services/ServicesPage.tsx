@@ -59,7 +59,7 @@ export function ServicesPage() {
 
       {!!services?.length && (
         <div className="table-wrap">
-          <table className="data-table">
+          <table className="data-table data-table-cards">
             <thead>
               <tr>
                 <th>{t('fields.name')}</th>
@@ -72,10 +72,12 @@ export function ServicesPage() {
             <tbody>
               {services.map((s) => (
                 <tr key={s.id} className={s.isActive ? undefined : 'row-muted'}>
-                  <td>{s.name}</td>
-                  <td>{t('minutes', { count: s.durationMin })}</td>
-                  <td>{formatCurrency(s.price, currentLocale())}</td>
-                  <td>{s.isActive ? t('active') : t('hidden')}</td>
+                  <td data-label={t('fields.name')}>{s.name}</td>
+                  <td data-label={t('fields.durationMin')}>
+                    {t('minutes', { count: s.durationMin })}
+                  </td>
+                  <td data-label={t('fields.price')}>{formatCurrency(s.price, currentLocale())}</td>
+                  <td data-label={t('status')}>{s.isActive ? t('active') : t('hidden')}</td>
                   <td className="row-actions">
                     <button
                       type="button"
