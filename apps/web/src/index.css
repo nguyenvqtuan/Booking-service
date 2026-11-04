@@ -530,3 +530,72 @@ a {
     font-size: 1.1rem;
   }
 }
+.settings-form {
+  max-width: 560px;
+}
+.custom-offset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.custom-offset input {
+  width: 90px;
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+}
+.form-success {
+  color: #1a7f37;
+}
+.public-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+.public-card {
+  width: 100%;
+  max-width: 480px;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 12px;
+  padding: 24px;
+  align-self: flex-start;
+}
+.public-card h1 {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+.slot-group {
+  border: 0;
+  padding: 0;
+  margin: 0 0 14px;
+}
+.slot-group legend {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 6px;
+}
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 8px;
+}
+.slot {
+  font: inherit;
+  padding: 10px 0;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.slot[aria-pressed='true'] {
+  background: #0969da;
+  border-color: #0969da;
+  color: #fff;
+}
+.booking-summary {
+  padding-left: 18px;
+}

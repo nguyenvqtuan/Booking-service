@@ -21,8 +21,17 @@ const CustomersPage = lazy(() =>
 const ServicesPage = lazy(() =>
   import('./pages/services/ServicesPage').then((m) => ({ default: m.ServicesPage })),
 );
+const ReminderSettingsPage = lazy(() =>
+  import('./pages/settings/ReminderSettingsPage').then((m) => ({
+    default: m.ReminderSettingsPage,
+  })),
+);
 const StaffPage = lazy(() =>
   import('./pages/staff/StaffPage').then((m) => ({ default: m.StaffPage })),
+);
+
+const PublicBookingPage = lazy(() =>
+  import('./pages/public/PublicBookingPage').then((m) => ({ default: m.PublicBookingPage })),
 );
 
 const queryClient = new QueryClient();
@@ -50,8 +59,11 @@ export function AppRoutes() {
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/staff" element={<StaffPage />} />
             <Route path="/customers" element={<CustomersPage />} />
+            <Route path="/settings/reminders" element={<ReminderSettingsPage />} />
           </Route>
         </Route>
+        {/* Static routes above win; salon slugs cannot clash with them (RESERVED_SLUGS). */}
+        <Route path="/:salonSlug" element={<PublicBookingPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
