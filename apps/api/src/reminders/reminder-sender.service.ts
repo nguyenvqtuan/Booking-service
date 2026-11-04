@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import type { DataSource } from 'typeorm';
+import type { DataSource, EntityManager } from 'typeorm';
 import { isActiveStatus, MessageLogStatus, ReminderJobStatus, utcToLocal } from '@booking/shared';
 import {
   Appointment,
@@ -65,10 +65,10 @@ export class ReminderSender {
     }
 
     const message = this.buildMessage(context);
-    const result = await this.deliver(job, message);
+    const { result, provider } = await this.deliver(job, message);
 
     if (result.outcome === SendOutcome.Success) {
-      await this.finish(job.id, ReminderJobStatus.Sent, null);
+      await this.recordSuccess(job, provider, message.to, result);
       return 'sent';
     }
     const error = result.error ?? result.outcome;
@@ -85,18 +85,43 @@ export class ReminderSender {
    * ZNS first; when the customer cannot receive ZNS and the salon enabled the fallback, SMS (BS-31).
    * Every attempt is logged; the job counts as delivered once, by whichever channel succeeded.
    */
-  private async deliver(job: ReminderJob, message: ReminderMessage): Promise<SendResult> {
+  private async deliver(
+    job: ReminderJob,
+    message: ReminderMessage,
+  ): Promise<{ result: SendResult; provider: MessageProvider }> {
     const zns = await this.safeSend(this.zns, message);
-    await this.log(job, this.zns, message.to, zns);
-    if (zns.outcome !== SendOutcome.RecipientUnreachable) return zns;
+    if (zns.outcome === SendOutcome.Success) return { result: zns, provider: this.zns };
+    await this.log(this.dataSource.manager, job, this.zns, message.to, zns);
+    if (zns.outcome !== SendOutcome.RecipientUnreachable)
+      return { result: zns, provider: this.zns };
 
     const { fallbackEnabled } = await this.settings.get(job.salonId);
     if (!fallbackEnabled) {
-      return { ...zns, error: `${zns.error ?? 'ZNS unreachable'} (SMS fallback disabled)` };
+      const error = `${zns.error ?? 'ZNS unreachable'} (SMS fallback disabled)`;
+      return { result: { ...zns, error }, provider: this.zns };
     }
     const sms = await this.safeSend(this.sms, message);
-    await this.log(job, this.sms, message.to, sms);
-    return sms;
+    if (sms.outcome !== SendOutcome.Success) {
+      await this.log(this.dataSource.manager, job, this.sms, message.to, sms);
+    }
+    return { result: sms, provider: this.sms };
+  }
+
+  /** The success log and the move to "sent" commit together, and only from "sending" (BS-33). */
+  private async recordSuccess(
+    job: ReminderJob,
+    provider: MessageProvider,
+    to: string,
+    result: SendResult,
+  ): Promise<void> {
+    await this.dataSource.transaction(async (em) => {
+      await this.log(em, job, provider, to, result);
+      await em.update(
+        ReminderJob,
+        { id: job.id, status: ReminderJobStatus.Sending },
+        { status: ReminderJobStatus.Sent, lastError: null, sentAt: new Date() },
+      );
+    });
   }
 
   /** queued/retrying -> sending, atomically; returns null when someone else got it first. */
@@ -154,8 +179,14 @@ export class ReminderSender {
     }
   }
 
-  private async log(job: ReminderJob, provider: MessageProvider, to: string, result: SendResult) {
-    await this.dataSource.getRepository(MessageLog).insert({
+  private async log(
+    em: EntityManager,
+    job: ReminderJob,
+    provider: MessageProvider,
+    to: string,
+    result: SendResult,
+  ) {
+    await em.insert(MessageLog, {
       salonId: job.salonId,
       reminderJobId: job.id,
       channel: provider.channel,
@@ -170,9 +201,6 @@ export class ReminderSender {
   private async finish(id: string, status: ReminderJobStatus, lastError: string | null) {
     await this.dataSource
       .getRepository(ReminderJob)
-      .update(
-        { id, status: ReminderJobStatus.Sending },
-        { status, lastError, ...(status === ReminderJobStatus.Sent && { sentAt: new Date() }) },
-      );
+      .update({ id, status: ReminderJobStatus.Sending }, { status, lastError });
   }
 }

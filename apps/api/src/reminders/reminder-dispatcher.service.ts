@@ -13,6 +13,8 @@ const BATCH_SIZE = 500;
 const STALE_QUEUED_MINUTES = 10;
 /** Longer than the largest retry delay: a "retrying" job this old lost its queue entry. */
 const STALE_RETRYING_MINUTES = 30;
+/** A job still "sending" after this long belongs to a worker that died mid-send. */
+const STUCK_SENDING_MINUTES = 30;
 
 /**
  * Moves due reminder jobs from the database to the queue (BS-27).
@@ -38,6 +40,7 @@ export class ReminderDispatcher {
     if (!this.config.get<boolean>('REMINDER_CRON_ENABLED')) return;
     try {
       await this.requeueStale();
+      await this.failStuckSending();
       const count = await this.dispatchDue();
       if (count) this.logger.log(`Queued ${count} reminder(s)`);
     } catch (err) {
@@ -77,6 +80,24 @@ export class ReminderDispatcher {
       total += rows.length;
       if (rows.length < BATCH_SIZE) return total;
     }
+  }
+
+  /**
+   * A worker died while sending: the message may or may not have gone out, so the job is
+   * failed rather than re-sent. A missing reminder is better than a duplicate one (BS-33).
+   */
+  async failStuckSending(now: Date = new Date()): Promise<number> {
+    const [, count] = (await this.dataSource.query(
+      `UPDATE reminder_jobs SET status = $1, last_error = $2, updated_at = now()
+       WHERE status = $3 AND updated_at < $4`,
+      [
+        ReminderJobStatus.Failed,
+        'Worker stopped while sending; delivery unknown, not retried',
+        ReminderJobStatus.Sending,
+        new Date(now.getTime() - STUCK_SENDING_MINUTES * 60_000),
+      ],
+    )) as [unknown[], number];
+    return count;
   }
 
   /** Puts jobs stuck in "queued"/"retrying" back to "pending" so the next tick enqueues them again. */

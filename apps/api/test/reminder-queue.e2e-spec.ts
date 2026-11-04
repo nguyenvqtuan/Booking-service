@@ -219,6 +219,69 @@ describe('reminder queue: dispatcher + worker (e2e)', () => {
     });
   });
 
+  describe('idempotency (BS-33, BS-61)', () => {
+    it('ignores a second enqueue with the same job id while the first one is waiting', async () => {
+      await queue.obliterate({ force: true });
+      const opts = { jobId: 'dup-job-id' };
+      await queue.add('send-reminder', { reminderJobId: 'dup-job-id' }, opts);
+      await queue.add('send-reminder', { reminderJobId: 'dup-job-id' }, opts);
+      expect((await queue.getJobCounts()).waiting).toBe(1);
+      await queue.obliterate({ force: true });
+    });
+
+    it('does not send again when a sent job is processed a second time', async () => {
+      const [id] = await dueReminders();
+      await dispatcher.dispatchDue();
+      expect(await sender.process(id)).toBe('sent');
+      expect(await sender.process(id)).toBe('skipped');
+      expect(zns.sent).toHaveLength(1);
+      const logs = await t.dataSource.getRepository(MessageLog).countBy({ reminderJobId: id });
+      expect(logs).toBe(1);
+    });
+
+    it('sends one message per job with several real BullMQ workers', async () => {
+      await queue.obliterate({ force: true });
+      const due: string[] = [];
+      for (let i = 0; i < 5; i++) due.push(...(await dueReminders()));
+      const consumers = await Promise.all(
+        [1, 2, 3].map(() => NestFactory.createApplicationContext(WorkerModule, { logger: false })),
+      );
+      const fakes = consumers.map((c) => c.get<FakeProvider>(ZNS_PROVIDER));
+      try {
+        await dispatcher.dispatchDue();
+        await vi.waitFor(
+          async () =>
+            expect(await jobs().countBy({ id: In(due), status: ReminderJobStatus.Sent })).toBe(
+              due.length,
+            ),
+          { timeout: 15_000, interval: 100 },
+        );
+        expect(fakes.reduce((n, f) => n + f.sent.length, 0)).toBe(due.length);
+        const logs = await t.dataSource
+          .getRepository(MessageLog)
+          .countBy({ reminderJobId: In(due) });
+        expect(logs).toBe(due.length);
+      } finally {
+        await Promise.all(consumers.map((c) => c.close()));
+      }
+    }, 30_000);
+
+    it('fails a job left in "sending" by a dead worker instead of sending it again', async () => {
+      const [id] = await dueReminders();
+      await dispatcher.dispatchDue();
+      await t.dataSource.query(
+        `UPDATE reminder_jobs SET status = 'sending', updated_at = now() - interval '31 minutes' WHERE id = $1`,
+        [id],
+      );
+      expect(await sender.process(id)).toBe('skipped');
+      await dispatcher.failStuckSending();
+      const job = await jobs().findOneByOrFail({ id });
+      expect(job.status).toBe(ReminderJobStatus.Failed);
+      expect(job.lastError).toContain('delivery unknown');
+      expect(zns.sent).toHaveLength(0);
+    });
+  });
+
   describe('retry with backoff (BS-32)', () => {
     const PHONE = '+84901234567';
     const logsOf = async (id: string) =>
