@@ -15,5 +15,13 @@
   "APPOINTMENT_INVALID_TRANSITION": "Không thể chuyển lịch hẹn sang trạng thái này.",
   "APPOINTMENT_NOT_EDITABLE": "Lịch hẹn đã kết thúc hoặc đã huỷ nên không thể sửa.",
   "STAFF_CANNOT_PERFORM_SERVICE": "Nhân viên này không làm dịch vụ đã chọn.",
-  "REFERENCE_INACTIVE": "Nhân viên hoặc dịch vụ đã ngừng hoạt động."
+  "REFERENCE_INACTIVE": "Nhân viên hoặc dịch vụ đã ngừng hoạt động.",
+  "SLOT_UNAVAILABLE": "Giờ này vừa có người đặt. Vui lòng chọn giờ khác.",
+  "ACTION_TOKEN_INVALID": "Liên kết không hợp lệ, đã hết hạn hoặc đã được sử dụng.",
+  "OTP_REQUIRED": "Vui lòng nhập mã xác thực.",
+  "OTP_INVALID": "Mã xác thực không đúng hoặc đã hết hạn.",
+  "OTP_LOCKED": "Nhập sai quá nhiều lần. Vui lòng thử lại sau 15 phút.",
+  "OTP_COOLDOWN": "Vui lòng chờ 1 phút trước khi gửi lại mã.",
+  "SERVICE_UNAVAILABLE": "Dịch vụ tạm thời gián đoạn, vui lòng thử lại.",
+  "APPOINTMENT_NOT_STARTED": "Lịch hẹn chưa đến giờ nên chưa thể đánh dấu không đến."
 }

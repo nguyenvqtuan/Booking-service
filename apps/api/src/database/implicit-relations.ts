@@ -36,6 +36,8 @@ export const IMPLICIT_RELATIONS: ImplicitRelation[] = [
     nullable: true,
   },
   { table: 'reminder_settings', column: 'salon_id', parentTable: 'salons' },
+  { table: 'appointment_action_tokens', column: 'salon_id', parentTable: 'salons' },
+  { table: 'appointment_action_tokens', column: 'appointment_id', parentTable: 'appointments' },
 ];
 
 /** *_id columns that are identifiers, not relations. */

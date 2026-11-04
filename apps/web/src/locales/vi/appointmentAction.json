@@ -1,0 +1,18 @@
+{
+  "title": "Lịch hẹn của bạn",
+  "heading": "Bạn sẽ đến đúng hẹn chứ?",
+  "invalidLink": "Liên kết không hợp lệ, đã hết hạn hoặc đã được sử dụng.",
+  "notActive": "Lịch hẹn này đã kết thúc hoặc đã huỷ.",
+  "confirm": "Xác nhận sẽ đến",
+  "reschedule": "Dời lịch",
+  "cancel": "Huỷ lịch",
+  "confirmCancel": "Bạn chắc chắn muốn huỷ lịch hẹn?",
+  "newDate": "Chọn ngày mới",
+  "noSlots": "Ngày này không còn giờ trống.",
+  "done": {
+    "confirmed": "Đã xác nhận lịch hẹn. Hẹn gặp bạn!",
+    "cancelled": "Đã huỷ lịch hẹn.",
+    "booked": "Đã dời lịch hẹn.",
+    "updated": "Đã cập nhật lịch hẹn."
+  }
+}

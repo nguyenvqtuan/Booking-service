@@ -35,6 +35,9 @@ jobs:
         ports: ['5432:5432']
         options: >-
           --health-cmd "pg_isready -U booking" --health-interval 5s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
     env:
       DB_HOST: localhost
       DB_PORT: 5432
@@ -43,6 +46,7 @@ jobs:
       DB_NAME: booking
       JWT_ACCESS_SECRET: ci-only-secret-0123456789abcdef0123456789abcdef
       BCRYPT_ROUNDS: 4
+      REDIS_URL: redis://localhost:6379
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -54,6 +58,6 @@ jobs:
       - run: pnpm --filter @booking/shared build
       - run: pnpm --filter @booking/api migration:run
       - run: pnpm --filter @booking/api migration:check
-      - run: pnpm --filter @booking/api test:e2e
+      - run: pnpm --filter @booking/api test:cov # e2e with a coverage threshold
       # BS-24: results must not depend on the server timezone.
       - run: TZ=America/New_York pnpm --filter @booking/api test:e2e

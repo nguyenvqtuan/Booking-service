@@ -58,7 +58,7 @@ export function StaffPage() {
 
       {!!staff?.length && (
         <div className="table-wrap">
-          <table className="data-table">
+          <table className="data-table data-table-cards">
             <thead>
               <tr>
                 <th>{t('fields.name')}</th>
@@ -71,13 +71,15 @@ export function StaffPage() {
             <tbody>
               {staff.map((s) => (
                 <tr key={s.id} className={s.isActive ? undefined : 'row-muted'}>
-                  <td>
+                  <td data-label={t('fields.name')}>
                     {s.name}
                     {!s.isActive && <span className="badge">{t('inactive')}</span>}
                   </td>
-                  <td>{s.phone}</td>
-                  <td>{workDays(s)}</td>
-                  <td>{s.serviceIds.map(serviceName).filter(Boolean).join(', ')}</td>
+                  <td data-label={t('fields.phone')}>{s.phone}</td>
+                  <td data-label={t('workDays')}>{workDays(s)}</td>
+                  <td data-label={t('fields.services')}>
+                    {s.serviceIds.map(serviceName).filter(Boolean).join(', ')}
+                  </td>
                   <td className="row-actions">
                     <button
                       type="button"

@@ -28,6 +28,8 @@ export function AppLayout() {
         <NavLink to="/services">{t('nav.services')}</NavLink>
         <NavLink to="/staff">{t('nav.staff')}</NavLink>
         <NavLink to="/customers">{t('nav.customers')}</NavLink>
+        <NavLink to="/reports">{t('nav.reports')}</NavLink>
+        <NavLink to="/settings/reminders">{t('nav.settings')}</NavLink>
       </nav>
       <main className="container">
         <Outlet />
