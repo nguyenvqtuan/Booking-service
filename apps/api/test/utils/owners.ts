@@ -10,6 +10,7 @@ export interface TestOwner {
   get(url: string): request.Test;
   post(url: string): request.Test;
   patch(url: string): request.Test;
+  put(url: string): request.Test;
   delete(url: string): request.Test;
 }
 
@@ -39,6 +40,7 @@ export class OwnerFactory {
       get: (url) => auth(request(server).get(url)),
       post: (url) => auth(request(server).post(url)),
       patch: (url) => auth(request(server).patch(url)),
+      put: (url) => auth(request(server).put(url)),
       delete: (url) => auth(request(server).delete(url)),
     };
   }
