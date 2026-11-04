@@ -1,0 +1,28 @@
+{
+  "title": "Online booking",
+  "salonNotFound": "Salon not found. Please check the link.",
+  "fields": {
+    "service": "Service",
+    "staff": "Staff member",
+    "date": "Date",
+    "time": "Available times",
+    "name": "Full name",
+    "phone": "Phone number"
+  },
+  "choose": "— Select —",
+  "minutes_one": "{{count}} minute",
+  "minutes_other": "{{count}} minutes",
+  "noSlots": "No times available on this day. Please choose another day.",
+  "invalidPhone": "Invalid phone number.",
+  "submit": "Book",
+  "success": {
+    "title": "Booking confirmed",
+    "message": "{{salon}} has received your booking and will remind you before your appointment."
+  },
+  "otp": {
+    "send": "Send verification code",
+    "resend": "Send again",
+    "sent": "Code sent by SMS. It is valid for 5 minutes.",
+    "code": "Verification code (6 digits)"
+  }
+}

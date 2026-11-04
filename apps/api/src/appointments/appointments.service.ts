@@ -15,6 +15,7 @@ import {
 import { AppException } from '../common/app.exception.js';
 import { isPgError, PgErrorCode } from '../common/pg-errors.js';
 import { Appointment, Customer, Service, Staff, StaffService } from '../database/entities/index.js';
+import { ReminderScheduler } from '../reminders/reminder-scheduler.service.js';
 import { findOwnedOrFail } from '../tenancy/index.js';
 
 const overlap = () =>
@@ -32,7 +33,10 @@ interface ResolvedRefs {
 
 @Injectable()
 export class AppointmentsService {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private readonly dataSource: DataSource,
+    private readonly reminders: ReminderScheduler,
+  ) {}
 
   /** Appointments overlapping [from, to), optionally for one staff member. */
   async list(
@@ -56,7 +60,7 @@ export class AppointmentsService {
       .getRawOne<RawAppointment>();
     if (!row)
       throw new AppException(HttpStatus.NOT_FOUND, ErrorCode.NotFound, 'Appointment not found');
-    return toDto(row);
+    return { ...toDto(row), reminders: await this.reminders.listFor(em, row.id) };
   }
 
   async create(
@@ -80,6 +84,7 @@ export class AppointmentsService {
           note: input.note ?? null,
         }),
       );
+      await this.reminders.sync(em, saved);
       return this.get(salonId, saved.id, em);
     });
   }
@@ -89,6 +94,7 @@ export class AppointmentsService {
     salonId: string,
     id: string,
     input: AppointmentUpdateParsed,
+    outer?: EntityManager,
   ): Promise<AppointmentDto> {
     return this.writeGuarded(async (em) => {
       const appt = await findOwnedOrFail(em.getRepository(Appointment), id, salonId);
@@ -117,8 +123,9 @@ export class AppointmentsService {
           ...(input.note !== undefined && { note: input.note }),
         },
       );
+      await this.reminders.sync(em, await em.findOneByOrFail(Appointment, { id: appt.id }));
       return this.get(salonId, appt.id, em);
-    });
+    }, outer);
   }
 
   /** Applies a state-machine transition (confirm / cancel / complete). */
@@ -126,8 +133,9 @@ export class AppointmentsService {
     salonId: string,
     id: string,
     status: AppointmentStatus,
+    outer?: EntityManager,
   ): Promise<AppointmentDto> {
-    return this.dataSource.transaction(async (em) => {
+    const run = async (em: EntityManager) => {
       const appt = await findOwnedOrFail(em.getRepository(Appointment), id, salonId);
       if (!canTransition(appt.status, status)) {
         throw new AppException(
@@ -149,8 +157,10 @@ export class AppointmentsService {
           'The appointment was changed concurrently',
         );
       }
+      await this.reminders.sync(em, { ...appt, status });
       return this.get(salonId, appt.id, em);
-    });
+    };
+    return outer ? run(outer) : this.dataSource.transaction(run);
   }
 
   /**
@@ -200,9 +210,12 @@ export class AppointmentsService {
   }
 
   /** Runs a write in a transaction and maps the no-overlap exclusion violation to 409. */
-  private async writeGuarded<T>(work: (em: EntityManager) => Promise<T>): Promise<T> {
+  private async writeGuarded<T>(
+    work: (em: EntityManager) => Promise<T>,
+    outer?: EntityManager,
+  ): Promise<T> {
     try {
-      return await this.dataSource.transaction(work);
+      return await (outer ? work(outer) : this.dataSource.transaction(work));
     } catch (err) {
       if (isPgError(err, PgErrorCode.ExclusionViolation, 'EXCL_appointments_staff_no_overlap')) {
         throw overlap();
