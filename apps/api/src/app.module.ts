@@ -17,6 +17,7 @@ import { MailModule } from './mail/mail.module.js';
 import { PublicBookingModule } from './public-booking/public-booking.module.js';
 import { QueueModule } from './queue/queue.module.js';
 import { RemindersModule } from './reminders/reminders.module.js';
+import { ReportsModule } from './reports/reports.module.js';
 import { SalonsModule } from './salons/salons.module.js';
 import { ServicesModule } from './services/services.module.js';
 import { SlotsModule } from './slots/slots.module.js';
@@ -48,6 +49,7 @@ import { StaffModule } from './staff/staff.module.js';
     SlotsModule,
     PublicBookingModule,
     AppointmentActionsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_FILTER, useClass: HttpExceptionFilter }],

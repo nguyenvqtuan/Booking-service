@@ -209,11 +209,10 @@ export class AppointmentsService {
     salonId: string,
     ids: { customerId: string; staffId: string; serviceId: string },
   ): Promise<ResolvedRefs> {
-    const [customer, staff, service] = await Promise.all([
-      em.findOneBy(Customer, { id: ids.customerId, salonId }),
-      em.findOneBy(Staff, { id: ids.staffId, salonId }),
-      em.findOneBy(Service, { id: ids.serviceId, salonId }),
-    ]);
+    // Sequential: a transaction has one connection, which cannot run queries in parallel.
+    const customer = await em.findOneBy(Customer, { id: ids.customerId, salonId });
+    const staff = await em.findOneBy(Staff, { id: ids.staffId, salonId });
+    const service = await em.findOneBy(Service, { id: ids.serviceId, salonId });
     const missing = Object.entries({ customerId: customer, staffId: staff, serviceId: service })
       .filter(([, v]) => !v)
       .map(([k]) => k);

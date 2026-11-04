@@ -17,7 +17,8 @@
     "services": "Services",
     "staff": "Staff",
     "customers": "Customers",
-    "settings": "Reminders"
+    "settings": "Reminders",
+    "reports": "Reports"
   },
   "close": "Close"
 }

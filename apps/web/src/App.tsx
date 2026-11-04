@@ -21,6 +21,9 @@ const CustomersPage = lazy(() =>
 const ServicesPage = lazy(() =>
   import('./pages/services/ServicesPage').then((m) => ({ default: m.ServicesPage })),
 );
+const ReportsPage = lazy(() =>
+  import('./pages/reports/ReportsPage').then((m) => ({ default: m.ReportsPage })),
+);
 const ReminderSettingsPage = lazy(() =>
   import('./pages/settings/ReminderSettingsPage').then((m) => ({
     default: m.ReminderSettingsPage,
@@ -64,6 +67,7 @@ export function AppRoutes() {
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/staff" element={<StaffPage />} />
             <Route path="/customers" element={<CustomersPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
             <Route path="/settings/reminders" element={<ReminderSettingsPage />} />
           </Route>
         </Route>
