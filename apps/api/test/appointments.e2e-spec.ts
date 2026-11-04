@@ -1,4 +1,5 @@
 import { ErrorCode } from '@booking/shared';
+import { Appointment, ReminderJob } from '../src/database/entities/index.js';
 import { OwnerFactory, type TestOwner } from './utils/owners.js';
 import { createTestApp, type TestApp } from './utils/test-app.js';
 
@@ -133,6 +134,71 @@ describe('appointments (e2e)', () => {
 
     const edit = await a.patch(`/appointments/${body.id}`).send({ note: 'x' }).expect(409);
     expect(edit.body.code).toBe(ErrorCode.AppointmentNotEditable);
+  });
+
+  describe('no-show (BS-41)', () => {
+    /** Books in the future, then moves the appointment into the past directly. */
+    const pastAppointment = async () => {
+      const { body } = await book(slot('09:00')).expect(201);
+      const started = new Date(Date.now() - (100 + day) * 3_600_000);
+      await t.dataSource
+        .getRepository(Appointment)
+        .update(
+          { id: body.id },
+          { startAt: started, endAt: new Date(started.getTime() + 1_800_000) },
+        );
+      return body.id as string;
+    };
+    const noShowCount = async () =>
+      (await a.get(`/customers/${ids.customerId}`).expect(200)).body.noShowCount as number;
+
+    it('marks a started appointment and increments the customer counter', async () => {
+      const before = await noShowCount();
+      const id = await pastAppointment();
+      const res = await a.post(`/appointments/${id}/no-show`).expect(200);
+      expect(res.body.status).toBe('no_show');
+      expect(await noShowCount()).toBe(before + 1);
+    });
+
+    it('refuses an appointment that has not started', async () => {
+      const before = await noShowCount();
+      const { body } = await book(slot('09:00')).expect(201);
+      const res = await a.post(`/appointments/${body.id}/no-show`).expect(409);
+      expect(res.body.code).toBe(ErrorCode.AppointmentNotStarted);
+      expect(await noShowCount()).toBe(before);
+    });
+
+    it.each(['completed', 'cancelled'])('refuses a %s appointment', async (status) => {
+      const before = await noShowCount();
+      const id = await pastAppointment();
+      await a.post(`/appointments/${id}/status`).send({ status }).expect(200);
+      const res = await a.post(`/appointments/${id}/no-show`).expect(409);
+      expect(res.body.code).toBe(ErrorCode.AppointmentInvalidTransition);
+      expect(await noShowCount()).toBe(before);
+    });
+
+    it('counts once when marked twice or concurrently', async () => {
+      const before = await noShowCount();
+      const id = await pastAppointment();
+      const results = await Promise.all([
+        a.post(`/appointments/${id}/no-show`),
+        a.post(`/appointments/${id}/no-show`),
+      ]);
+      expect(results.map((r) => r.status).sort()).toEqual([200, 409]);
+      expect(await noShowCount()).toBe(before + 1);
+    });
+
+    it('frees the slot and cancels open reminders', async () => {
+      const id = await pastAppointment();
+      await a.post(`/appointments/${id}/no-show`).expect(200);
+      const jobs = await t.dataSource.getRepository(ReminderJob).findBy({ appointmentId: id });
+      expect(jobs.every((j) => j.status === 'cancelled')).toBe(true);
+    });
+
+    it('is tenant scoped', async () => {
+      const id = await pastAppointment();
+      await b.post(`/appointments/${id}/no-show`).expect(404);
+    });
   });
 
   describe('reference checks (implicit relations, BS-70)', () => {

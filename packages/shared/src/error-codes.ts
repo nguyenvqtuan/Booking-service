@@ -22,6 +22,7 @@ export const ErrorCode = {
   AppointmentOverlap: 'APPOINTMENT_OVERLAP',
   AppointmentInvalidTransition: 'APPOINTMENT_INVALID_TRANSITION',
   AppointmentNotEditable: 'APPOINTMENT_NOT_EDITABLE',
+  AppointmentNotStarted: 'APPOINTMENT_NOT_STARTED',
   StaffCannotPerformService: 'STAFF_CANNOT_PERFORM_SERVICE',
   ReferenceInactive: 'REFERENCE_INACTIVE',
   SlotUnavailable: 'SLOT_UNAVAILABLE',

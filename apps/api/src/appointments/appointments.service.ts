@@ -163,6 +163,43 @@ export class AppointmentsService {
     return outer ? run(outer) : this.dataSource.transaction(run);
   }
 
+  /** Marks a no-show and counts it on the customer, atomically (BS-41). */
+  async markNoShow(salonId: string, id: string, now: Date = new Date()): Promise<AppointmentDto> {
+    return this.dataSource.transaction(async (em) => {
+      const appt = await findOwnedOrFail(em.getRepository(Appointment), id, salonId);
+      if (!canTransition(appt.status, AppointmentStatus.NoShow)) {
+        throw new AppException(
+          HttpStatus.CONFLICT,
+          ErrorCode.AppointmentInvalidTransition,
+          `Cannot mark a ${appt.status} appointment as no-show`,
+        );
+      }
+      if (appt.startAt.getTime() > now.getTime()) {
+        throw new AppException(
+          HttpStatus.CONFLICT,
+          ErrorCode.AppointmentNotStarted,
+          'The appointment has not started yet',
+        );
+      }
+      // Conditional: two concurrent requests must not count the same no-show twice.
+      const { affected } = await em.update(
+        Appointment,
+        { id: appt.id, salonId, status: appt.status },
+        { status: AppointmentStatus.NoShow },
+      );
+      if (!affected) {
+        throw new AppException(
+          HttpStatus.CONFLICT,
+          ErrorCode.AppointmentInvalidTransition,
+          'The appointment was changed concurrently',
+        );
+      }
+      await em.increment(Customer, { id: appt.customerId, salonId }, 'noShowCount', 1);
+      await this.reminders.sync(em, { ...appt, status: AppointmentStatus.NoShow });
+      return this.get(salonId, appt.id, em);
+    });
+  }
+
   /**
    * Checks implicit references (BS-70): every id must exist in the caller's salon, staff and
    * service must be active and the staff member must offer the service.

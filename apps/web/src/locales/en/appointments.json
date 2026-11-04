@@ -28,5 +28,7 @@
   "views": {
     "calendar": "Calendar",
     "list": "List"
-  }
+  },
+  "noShow": "No-show",
+  "confirmNoShow": "Mark {{name}} as a no-show? The customer's no-show count will increase by 1."
 }

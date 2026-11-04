@@ -22,5 +22,6 @@
   "OTP_INVALID": "The code is incorrect or has expired.",
   "OTP_LOCKED": "Too many incorrect attempts. Please try again in 15 minutes.",
   "OTP_COOLDOWN": "Please wait 1 minute before requesting a new code.",
-  "SERVICE_UNAVAILABLE": "Service temporarily unavailable, please try again."
+  "SERVICE_UNAVAILABLE": "Service temporarily unavailable, please try again.",
+  "APPOINTMENT_NOT_STARTED": "The appointment has not started yet."
 }
