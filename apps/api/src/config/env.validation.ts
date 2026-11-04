@@ -29,6 +29,10 @@ export const envValidationSchema = Joi.object({
   REMINDER_CRON_ENABLED: Joi.boolean().truthy('true').falsy('false').default(true),
   /** Message provider: 'fake' logs messages instead of sending them (dev/tests). */
   MESSAGE_PROVIDER: Joi.string().valid('fake', 'live').default('fake'),
+  /** Delays between reminder retries for transient errors, in ms (BS-32): 1, 5, 15 minutes. */
+  REMINDER_RETRY_DELAYS_MS: Joi.string()
+    .pattern(/^\d+(,\d+)*$/)
+    .default('60000,300000,900000'),
 
   // Zalo ZNS (BS-29) — required when MESSAGE_PROVIDER=live.
   ZNS_API_URL: Joi.string().uri().default('https://business.openapi.zalo.me'),

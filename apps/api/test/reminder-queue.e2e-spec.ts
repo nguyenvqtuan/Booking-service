@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import type { INestApplicationContext } from '@nestjs/common';
 import { localToUtc, ReminderJobStatus } from '@booking/shared';
-import { In } from 'typeorm';
+import { In, Not } from 'typeorm';
 import { MessageLog, ReminderJob } from '../src/database/entities/index.js';
 import { type FakeProvider } from '../src/messaging/fake.provider.js';
 import { SendOutcome, SMS_PROVIDER, ZNS_PROVIDER } from '../src/messaging/message-provider.js';
@@ -216,6 +216,92 @@ describe('reminder queue: dispatcher + worker (e2e)', () => {
       expect(await sender.process(id)).toBe('failed');
       expect(sms.sent).toHaveLength(0);
       expect(await logsOf(id)).toEqual(['zns:permanent']);
+    });
+  });
+
+  describe('retry with backoff (BS-32)', () => {
+    const PHONE = '+84901234567';
+    const logsOf = async (id: string) =>
+      (
+        await t.dataSource
+          .getRepository(MessageLog)
+          .find({ where: { reminderJobId: id }, order: { createdAt: 'ASC' } })
+      ).map((l) => l.status);
+
+    it('marks a transient failure as retrying while attempts remain, then it can be claimed again', async () => {
+      const [id] = await dueReminders();
+      await dispatcher.dispatchDue();
+      zns.respondTo(PHONE, SendOutcome.Transient);
+
+      expect(await sender.process(id, { isLastAttempt: false })).toBe('retry');
+      const job = await jobs().findOneByOrFail({ id });
+      expect(job).toMatchObject({ status: ReminderJobStatus.Retrying, attemptCount: 1 });
+      expect(job.lastError).toContain('transient');
+
+      expect(await sender.process(id, { isLastAttempt: false })).toBe('sent');
+      expect((await jobs().findOneByOrFail({ id })).attemptCount).toBe(2);
+      expect(await logsOf(id)).toEqual(['transient', 'success']);
+    });
+
+    it('never retries a permanent failure (e.g. invalid phone)', async () => {
+      const [id] = await dueReminders();
+      await dispatcher.dispatchDue();
+      zns.respondTo(PHONE, SendOutcome.Permanent);
+      expect(await sender.process(id, { isLastAttempt: false })).toBe('failed');
+      expect((await jobs().findOneByOrFail({ id })).status).toBe(ReminderJobStatus.Failed);
+    });
+
+    async function runWorkerUntil(ids: string[], status: ReminderJobStatus) {
+      const consumer = worker.get(ReminderWorker);
+      consumer.onModuleInit();
+      try {
+        await dispatcher.dispatchDue();
+        await vi.waitFor(
+          async () => expect(await jobs().findBy({ id: In(ids), status })).toHaveLength(ids.length),
+          { timeout: 15_000, interval: 100 },
+        );
+      } finally {
+        await consumer.onApplicationShutdown();
+      }
+    }
+
+    it('the queue retries transient failures with backoff until the reminder is sent', async () => {
+      await queue.obliterate({ force: true });
+      const [id] = await dueReminders();
+      await jobs().update(
+        { appointmentId: (await jobs().findOneByOrFail({ id })).appointmentId, id: Not(id) },
+        { status: ReminderJobStatus.Cancelled },
+      );
+      zns.respondTo(PHONE, SendOutcome.Transient, SendOutcome.Transient);
+
+      await runWorkerUntil([id], ReminderJobStatus.Sent);
+      expect((await jobs().findOneByOrFail({ id })).attemptCount).toBe(3);
+      expect(await logsOf(id)).toEqual(['transient', 'transient', 'success']);
+    }, 20_000);
+
+    it('gives up after 1 + 3 retries and marks the job failed', async () => {
+      await queue.obliterate({ force: true });
+      const [id] = await dueReminders();
+      await jobs().update(
+        { appointmentId: (await jobs().findOneByOrFail({ id })).appointmentId, id: Not(id) },
+        { status: ReminderJobStatus.Cancelled },
+      );
+      zns.respondTo(PHONE, ...Array<SendOutcome>(10).fill(SendOutcome.Transient));
+
+      await runWorkerUntil([id], ReminderJobStatus.Failed);
+      expect((await jobs().findOneByOrFail({ id })).attemptCount).toBe(4);
+      expect(await logsOf(id)).toEqual(['transient', 'transient', 'transient', 'transient']);
+    }, 20_000);
+
+    it('puts a "retrying" job that lost its queue entry back to pending', async () => {
+      const [id] = await dueReminders();
+      await jobs().update({ id }, { status: ReminderJobStatus.Retrying });
+      await t.dataSource.query(
+        `UPDATE reminder_jobs SET updated_at = now() - interval '31 minutes' WHERE id = $1`,
+        [id],
+      );
+      await dispatcher.requeueStale();
+      expect((await jobs().findOneByOrFail({ id })).status).toBe(ReminderJobStatus.Pending);
     });
   });
 

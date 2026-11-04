@@ -21,8 +21,6 @@ export interface TestApp {
 }
 
 export async function createTestApp(): Promise<TestApp> {
-  // Tests drive the reminder dispatcher explicitly instead of waiting for the cron.
-  process.env.REMINDER_CRON_ENABLED = 'false';
   const mail = new CapturingMailService();
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(MailService)

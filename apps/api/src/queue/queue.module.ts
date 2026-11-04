@@ -19,7 +19,9 @@ export type ReminderQueue = Queue<ReminderQueuePayload>;
       useFactory: (config: ConfigService): ReminderQueue =>
         new Queue<ReminderQueuePayload>(REMINDER_QUEUE_NAME, {
           connection: createRedis(config.getOrThrow<string>('REDIS_URL')),
-          defaultJobOptions: { removeOnComplete: 1000, removeOnFail: 5000 },
+          // Finished jobs are removed: the database is the source of truth, and keeping them would
+          // make BullMQ silently ignore a later enqueue of the same (re-armed) reminder id.
+          defaultJobOptions: { removeOnComplete: true, removeOnFail: true },
         }),
     },
   ],

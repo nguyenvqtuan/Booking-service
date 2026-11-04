@@ -20,7 +20,14 @@ import {
 } from '../messaging/message-provider.js';
 import { ReminderSettingsService } from './reminder-settings.service.js';
 
-export type ProcessResult = 'sent' | 'skipped' | 'cancelled' | 'failed';
+/** 'retry' = transient failure, the queue must try again later (BS-32). */
+export type ProcessResult = 'sent' | 'skipped' | 'cancelled' | 'failed' | 'retry';
+
+export interface ProcessOptions {
+  now?: Date;
+  /** False while the queue still has attempts left; transient failures are then retried. */
+  isLastAttempt?: boolean;
+}
 
 const LOG_STATUS: Record<SendOutcome, MessageLogStatus> = {
   [SendOutcome.Success]: MessageLogStatus.Success,
@@ -41,7 +48,8 @@ export class ReminderSender {
     private readonly settings: ReminderSettingsService,
   ) {}
 
-  async process(reminderJobId: string, now: Date = new Date()): Promise<ProcessResult> {
+  async process(reminderJobId: string, options: ProcessOptions = {}): Promise<ProcessResult> {
+    const { now = new Date(), isLastAttempt = true } = options;
     const job = await this.claim(reminderJobId);
     // Not claimable: already sent/cancelled, or another worker owns it (BS-33).
     if (!job) return 'skipped';
@@ -63,7 +71,13 @@ export class ReminderSender {
       await this.finish(job.id, ReminderJobStatus.Sent, null);
       return 'sent';
     }
-    await this.finish(job.id, ReminderJobStatus.Failed, result.error ?? result.outcome);
+    const error = result.error ?? result.outcome;
+    // Only temporary errors are retried; permanent ones (bad number, config) fail right away.
+    if (result.outcome === SendOutcome.Transient && !isLastAttempt) {
+      await this.finish(job.id, ReminderJobStatus.Retrying, error);
+      return 'retry';
+    }
+    await this.finish(job.id, ReminderJobStatus.Failed, error);
     return 'failed';
   }
 
