@@ -23,6 +23,7 @@ export async function deleteSalonData(em: EntityManager, salonId: string): Promi
 
   await bySalon('message_logs');
   await bySalon('reminder_jobs');
+  await bySalon('appointment_action_tokens');
   await bySalon('appointments');
   await em.query(
     `DELETE FROM staff_services WHERE staff_id IN (SELECT id FROM staff WHERE salon_id = $1)

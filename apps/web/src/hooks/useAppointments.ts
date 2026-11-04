@@ -37,6 +37,19 @@ export function useSaveAppointment() {
   });
 }
 
+export function useMarkNoShow() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) =>
+      (await api.post<AppointmentDto>(`/appointments/${id}/no-show`)).data,
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: KEY });
+      // The customer's no-show badge changes too.
+      await qc.invalidateQueries({ queryKey: ['customers'] });
+    },
+  });
+}
+
 export function useChangeAppointmentStatus() {
   const qc = useQueryClient();
   return useMutation({
