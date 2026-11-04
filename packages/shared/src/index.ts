@@ -7,6 +7,7 @@ export * from './locale.js';
 export * from './phone.js';
 export * from './reminders.js';
 export * from './services.js';
+export * from './slots.js';
 export * from './staff.js';
 export * from './time.js';
 export * from './working-hours.js';

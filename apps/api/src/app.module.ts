@@ -16,6 +16,7 @@ import { QueueModule } from './queue/queue.module.js';
 import { RemindersModule } from './reminders/reminders.module.js';
 import { SalonsModule } from './salons/salons.module.js';
 import { ServicesModule } from './services/services.module.js';
+import { SlotsModule } from './slots/slots.module.js';
 import { StaffModule } from './staff/staff.module.js';
 
 @Module({
@@ -37,6 +38,7 @@ import { StaffModule } from './staff/staff.module.js';
     SalonsModule,
     AppointmentsModule,
     RemindersModule,
+    SlotsModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_FILTER, useClass: HttpExceptionFilter }],
