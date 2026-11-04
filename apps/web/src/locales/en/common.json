@@ -16,7 +16,9 @@
     "appointments": "Appointments",
     "services": "Services",
     "staff": "Staff",
-    "customers": "Customers"
+    "customers": "Customers",
+    "settings": "Reminders",
+    "reports": "Reports"
   },
   "close": "Close"
 }

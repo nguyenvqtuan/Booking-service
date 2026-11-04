@@ -16,7 +16,9 @@
     "appointments": "Lịch hẹn",
     "services": "Dịch vụ",
     "staff": "Nhân viên",
-    "customers": "Khách hàng"
+    "customers": "Khách hàng",
+    "settings": "Cài đặt nhắc",
+    "reports": "Báo cáo"
   },
   "close": "Đóng"
 }

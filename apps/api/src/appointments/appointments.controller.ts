@@ -63,6 +63,15 @@ export class AppointmentsController {
     return this.appointments.update(salonId, id, body);
   }
 
+  @Post(':id/no-show')
+  @HttpCode(HttpStatus.OK)
+  markNoShow(
+    @CurrentSalon() salonId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<AppointmentDto> {
+    return this.appointments.markNoShow(salonId, id);
+  }
+
   @Post(':id/status')
   @HttpCode(HttpStatus.OK)
   changeStatus(

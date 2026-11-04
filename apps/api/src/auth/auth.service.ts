@@ -13,6 +13,7 @@ import {
   type ForgotPasswordInput,
   type LoginInput,
   type RegisterInput,
+  RESERVED_SLUGS,
   type ResetPasswordInput,
   type UpdateProfileInput,
 } from '@booking/shared';
@@ -234,6 +235,7 @@ export class AuthService {
     const base = slugify(name) || 'salon';
     for (let n = 1; ; n++) {
       const candidate = n === 1 ? base : `${base}-${n}`;
+      if (RESERVED_SLUGS.includes(candidate)) continue;
       if (!(await em.exists(Salon, { where: { slug: candidate } }))) return candidate;
     }
   }

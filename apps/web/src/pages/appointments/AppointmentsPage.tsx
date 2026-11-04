@@ -8,7 +8,12 @@ import {
 } from '@booking/shared';
 import { useAuth } from '../../auth/auth-context';
 import { Modal } from '../../components/Modal';
-import { useAppointments, useChangeAppointmentStatus } from '../../hooks/useAppointments';
+import {
+  useAppointments,
+  useChangeAppointmentStatus,
+  useMarkNoShow,
+} from '../../hooks/useAppointments';
+import { useNow } from '../../hooks/useNow';
 import { useStaffList } from '../../hooks/useStaff';
 import { getApiErrorMessage } from '../../lib/api-error';
 import { salonDayRange, salonTime, salonToday } from '../../lib/salon-time';
@@ -59,6 +64,8 @@ export function AppointmentsPage() {
     { enabled: view === 'list' },
   );
   const changeStatus = useChangeAppointmentStatus();
+  const markNoShow = useMarkNoShow();
+  const now = useNow();
   const [dialog, setDialog] = useState<Dialog>(null);
   const [actionError, setActionError] = useState<string>();
 
@@ -72,6 +79,17 @@ export function AppointmentsPage() {
     setActionError(undefined);
     try {
       await changeStatus.mutateAsync({ id: a.id, status });
+      setDialog(null);
+    } catch (err) {
+      setActionError(getApiErrorMessage(err));
+    }
+  };
+
+  const noShow = async (a: AppointmentDto) => {
+    if (!window.confirm(t('confirmNoShow', { name: a.customerName }))) return;
+    setActionError(undefined);
+    try {
+      await markNoShow.mutateAsync(a.id);
       setDialog(null);
     } catch (err) {
       setActionError(getApiErrorMessage(err));
@@ -104,6 +122,11 @@ export function AppointmentsPage() {
         >
           {t('edit')}
         </button>
+        {new Date(a.startAt).getTime() <= now && (
+          <button type="button" className="btn-link danger" onClick={() => void noShow(a)}>
+            {t('noShow')}
+          </button>
+        )}
         <button
           type="button"
           className="btn-link danger"

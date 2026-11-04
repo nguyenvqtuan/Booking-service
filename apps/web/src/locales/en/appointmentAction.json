@@ -1,0 +1,18 @@
+{
+  "title": "Your appointment",
+  "heading": "Will you be there on time?",
+  "invalidLink": "This link is invalid, expired or already used.",
+  "notActive": "This appointment is finished or cancelled.",
+  "confirm": "Confirm",
+  "reschedule": "Reschedule",
+  "cancel": "Cancel appointment",
+  "confirmCancel": "Are you sure you want to cancel this appointment?",
+  "newDate": "Choose a new date",
+  "noSlots": "No times available on this day.",
+  "done": {
+    "confirmed": "Appointment confirmed. See you soon!",
+    "cancelled": "Appointment cancelled.",
+    "booked": "Appointment rescheduled.",
+    "updated": "Appointment updated."
+  }
+}

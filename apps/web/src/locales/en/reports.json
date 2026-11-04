@@ -1,0 +1,18 @@
+{
+  "title": "Reports",
+  "from": "From",
+  "to": "To",
+  "invalidRange": "The start date must be before the end date.",
+  "empty": "No data in this period yet.",
+  "appointments": "Appointments",
+  "completed": "Completed",
+  "noShow": "No-show",
+  "cancelled": "Cancelled",
+  "noShowRate": "No-show rate",
+  "messages": "Messages sent",
+  "messageSuccessRate": "Delivery rate",
+  "rateHint": "No-show rate = no-shows / (completed + no-shows).",
+  "month": "Month",
+  "tableView": "View data table",
+  "chart": { "title": "Appointment outcomes by month" }
+}

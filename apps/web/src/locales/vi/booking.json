@@ -1,0 +1,28 @@
+{
+  "title": "Đặt lịch online",
+  "salonNotFound": "Không tìm thấy tiệm. Vui lòng kiểm tra lại đường dẫn.",
+  "fields": {
+    "service": "Dịch vụ",
+    "staff": "Nhân viên",
+    "date": "Ngày",
+    "time": "Giờ còn trống",
+    "name": "Họ tên",
+    "phone": "Số điện thoại"
+  },
+  "choose": "— Chọn —",
+  "minutes_one": "{{count}} phút",
+  "minutes_other": "{{count}} phút",
+  "noSlots": "Ngày này đã hết chỗ hoặc nhân viên nghỉ. Vui lòng chọn ngày khác.",
+  "invalidPhone": "Số điện thoại không hợp lệ.",
+  "submit": "Đặt lịch",
+  "success": {
+    "title": "Đặt lịch thành công",
+    "message": "{{salon}} đã nhận lịch của bạn và sẽ nhắc bạn trước giờ hẹn."
+  },
+  "otp": {
+    "send": "Gửi mã xác thực",
+    "resend": "Gửi lại mã",
+    "sent": "Đã gửi mã qua SMS. Mã có hiệu lực 5 phút.",
+    "code": "Mã xác thực (6 số)"
+  }
+}
