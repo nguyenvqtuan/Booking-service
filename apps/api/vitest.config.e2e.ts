@@ -17,6 +17,16 @@ export default defineConfig({
       PUBLIC_RATE_LIMIT_PER_MIN: '100000',
     },
     fileParallelism: false,
+    coverage: {
+      include: ['src/**'],
+      exclude: [
+        'src/**/*.spec.ts',
+        'src/database/migrations/**',
+        'src/main*.ts',
+        'src/database/seeds/run-seed.ts',
+      ],
+      thresholds: { lines: 85, functions: 85 },
+    },
     hookTimeout: 30000,
   },
 });

@@ -58,6 +58,6 @@ jobs:
       - run: pnpm --filter @booking/shared build
       - run: pnpm --filter @booking/api migration:run
       - run: pnpm --filter @booking/api migration:check
-      - run: pnpm --filter @booking/api test:e2e
+      - run: pnpm --filter @booking/api test:cov # e2e with a coverage threshold
       # BS-24: results must not depend on the server timezone.
       - run: TZ=America/New_York pnpm --filter @booking/api test:e2e
