@@ -32,44 +32,76 @@ export class RefreshTokenService {
     userId: string,
     familyId: string = randomUUID(),
     em: EntityManager = this.dataSource.manager,
+    salonId: string | null = null,
   ): Promise<IssuedRefreshToken> {
     const token = generateOpaqueToken();
     const ttlDays = this.config.getOrThrow<number>('REFRESH_TOKEN_TTL_DAYS');
     const expiresAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
-    await em.insert(RefreshToken, { userId, familyId, tokenHash: hashToken(token), expiresAt });
+    await em.insert(RefreshToken, {
+      userId,
+      familyId,
+      salonId,
+      tokenHash: hashToken(token),
+      expiresAt,
+    });
     return { token, expiresAt };
   }
 
   /**
-   * Rotates a refresh token: the presented token is revoked and a new one in the same family
-   * is issued. Presenting an already-revoked token is treated as theft and revokes the family.
-   * The conditional UPDATE makes concurrent rotations of the same token safe (only one wins).
+   * Rotates a refresh token: the presented token is revoked and a new one in the same family is
+   * issued. The row lock serializes concurrent rotations of the same token.
+   *
+   * Presenting a token rotated moments ago is normal: the page was reloaded during the request
+   * (the browser never stored the new cookie) or another tab refreshed at the same time. Within
+   * the grace period, and while the session is still alive, it gets a new token. Any other reuse
+   * of a revoked token is treated as theft and revokes the family. A session ended by logout, a
+   * password reset or a theft alarm has no active token left, so the grace period cannot revive it.
    */
-  async rotate(rawToken: string): Promise<{ userId: string } & IssuedRefreshToken> {
+  async rotate(
+    rawToken: string,
+  ): Promise<{ userId: string; salonId: string | null } & IssuedRefreshToken> {
     const result = await this.dataSource.transaction(async (em) => {
-      const existing = await em.findOne(RefreshToken, {
-        where: { tokenHash: hashToken(rawToken) },
-      });
+      const existing = await em
+        .getRepository(RefreshToken)
+        .createQueryBuilder('t')
+        .setLock('pessimistic_write')
+        .where('t.token_hash = :hash', { hash: hashToken(rawToken) })
+        .getOne();
       if (!existing) return { ok: false as const };
 
       if (existing.revokedAt) {
-        await this.revokeFamily(existing.familyId, em);
-        return { ok: false as const };
+        const graceMs = this.config.getOrThrow<number>('REFRESH_REUSE_GRACE_SEC') * 1000;
+        const recent = Date.now() - existing.revokedAt.getTime() <= graceMs;
+        const sessionAlive = await em.exists(RefreshToken, {
+          where: { familyId: existing.familyId, revokedAt: IsNull() },
+        });
+        if (!recent || !sessionAlive) {
+          await this.revokeFamily(existing.familyId, em);
+          return { ok: false as const };
+        }
+      } else {
+        if (existing.expiresAt.getTime() <= Date.now()) return { ok: false as const };
+        await em.update(RefreshToken, { id: existing.id }, { revokedAt: new Date() });
       }
-      if (existing.expiresAt.getTime() <= Date.now()) return { ok: false as const };
 
-      const { affected } = await em.update(
-        RefreshToken,
-        { id: existing.id, revokedAt: IsNull() },
-        { revokedAt: new Date() },
-      );
-      if (!affected) return { ok: false as const };
-
-      const issued = await this.issue(existing.userId, existing.familyId, em);
-      return { ok: true as const, userId: existing.userId, ...issued };
+      // The selected salon stays with the session across rotations.
+      const issued = await this.issue(existing.userId, existing.familyId, em, existing.salonId);
+      return { ok: true as const, userId: existing.userId, salonId: existing.salonId, ...issued };
     });
     if (!result.ok) throw invalidRefreshToken();
-    return { userId: result.userId, token: result.token, expiresAt: result.expiresAt };
+    return {
+      userId: result.userId,
+      salonId: result.salonId,
+      token: result.token,
+      expiresAt: result.expiresAt,
+    };
+  }
+
+  /** Remembers the salon selected in this session (BS-42). */
+  async setSalon(rawToken: string, salonId: string): Promise<void> {
+    await this.dataSource
+      .getRepository(RefreshToken)
+      .update({ tokenHash: hashToken(rawToken), revokedAt: IsNull() }, { salonId });
   }
 
   /** Revokes a single token (logout). Unknown tokens are ignored. */

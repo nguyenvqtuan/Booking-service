@@ -1,3 +1,4 @@
+export * from './appointment-action-token.entity.js';
 export * from './appointment.entity.js';
 export * from './customer.entity.js';
 export * from './message-log.entity.js';
@@ -7,6 +8,8 @@ export * from './salon.entity.js';
 export * from './service.entity.js';
 export * from './staff-service.entity.js';
 export * from './staff.entity.js';
+export * from './user-salon.entity.js';
 export * from './user.entity.js';
 export * from './password-reset-token.entity.js';
+export * from './provider-token.entity.js';
 export * from './refresh-token.entity.js';

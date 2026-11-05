@@ -1,3 +1,4 @@
+export * from './appointment-actions.js';
 export * from './appointments.js';
 export * from './auth.js';
 export * from './customers.js';
@@ -5,7 +6,12 @@ export * from './enums.js';
 export * from './error-codes.js';
 export * from './locale.js';
 export * from './phone.js';
+export * from './public-booking.js';
+export * from './reminders.js';
+export * from './reports.js';
+export * from './salons.js';
 export * from './services.js';
+export * from './slots.js';
 export * from './staff.js';
 export * from './time.js';
 export * from './working-hours.js';

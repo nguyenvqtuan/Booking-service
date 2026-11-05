@@ -15,7 +15,10 @@ export interface ImplicitRelation {
 
 export const IMPLICIT_RELATIONS: ImplicitRelation[] = [
   { table: 'users', column: 'salon_id', parentTable: 'salons' },
+  { table: 'user_salons', column: 'user_id', parentTable: 'users' },
+  { table: 'user_salons', column: 'salon_id', parentTable: 'salons' },
   { table: 'refresh_tokens', column: 'user_id', parentTable: 'users' },
+  { table: 'refresh_tokens', column: 'salon_id', parentTable: 'salons', nullable: true },
   { table: 'password_reset_tokens', column: 'user_id', parentTable: 'users' },
   { table: 'staff', column: 'salon_id', parentTable: 'salons' },
   { table: 'services', column: 'salon_id', parentTable: 'salons' },
@@ -36,6 +39,8 @@ export const IMPLICIT_RELATIONS: ImplicitRelation[] = [
     nullable: true,
   },
   { table: 'reminder_settings', column: 'salon_id', parentTable: 'salons' },
+  { table: 'appointment_action_tokens', column: 'salon_id', parentTable: 'salons' },
+  { table: 'appointment_action_tokens', column: 'appointment_id', parentTable: 'appointments' },
 ];
 
 /** *_id columns that are identifiers, not relations. */

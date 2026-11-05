@@ -1,4 +1,16 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Patch,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { ConfigService } from '@nestjs/config';
 import type { Request, Response } from 'express';
 import {
@@ -13,6 +25,8 @@ import {
   registerSchema,
   type ResetPasswordInput,
   resetPasswordSchema,
+  type SwitchSalonInput,
+  switchSalonSchema,
   type UpdateProfileInput,
   updateProfileSchema,
 } from '@booking/shared';
@@ -26,6 +40,7 @@ export const REFRESH_COOKIE = 'bs_refresh';
 /** The refresh cookie is only sent to /auth endpoints. */
 const REFRESH_COOKIE_PATH = '/auth';
 
+@UseGuards(ThrottlerGuard)
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -96,7 +111,7 @@ export class AuthController {
   @Get('me')
   @TenantAgnostic('Reads the authenticated user by id from the token')
   me(@CurrentUser() user: AccessTokenPayload): Promise<AuthUser> {
-    return this.auth.me(user.sub);
+    return this.auth.me(user.sub, user.salonId);
   }
 
   @Patch('me')
@@ -105,7 +120,18 @@ export class AuthController {
     @CurrentUser() user: AccessTokenPayload,
     @Body(new ZodValidationPipe(updateProfileSchema)) body: UpdateProfileInput,
   ): Promise<AuthUser> {
-    return this.auth.updateProfile(user.sub, body);
+    return this.auth.updateProfile(user.sub, user.salonId, body);
+  }
+
+  @Post('switch-salon')
+  @HttpCode(HttpStatus.OK)
+  @TenantAgnostic('Selects a salon; membership of the authenticated user is checked')
+  switchSalon(
+    @CurrentUser() user: AccessTokenPayload,
+    @Body(new ZodValidationPipe(switchSalonSchema)) body: SwitchSalonInput,
+    @Req() req: Request,
+  ): Promise<AuthResponse> {
+    return this.auth.switchSalon(user.sub, body.salonId, this.readCookie(req));
   }
 
   private withCookie(res: Response, result: AuthResult): AuthResponse {

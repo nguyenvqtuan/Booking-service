@@ -23,6 +23,7 @@ export async function deleteSalonData(em: EntityManager, salonId: string): Promi
 
   await bySalon('message_logs');
   await bySalon('reminder_jobs');
+  await bySalon('appointment_action_tokens');
   await bySalon('appointments');
   await em.query(
     `DELETE FROM staff_services WHERE staff_id IN (SELECT id FROM staff WHERE salon_id = $1)
@@ -33,6 +34,15 @@ export async function deleteSalonData(em: EntityManager, salonId: string): Promi
   await bySalon('services');
   await bySalon('customers');
   await bySalon('reminder_settings');
+  // Users with other salons survive: they move to one of those. The rest are deleted below.
+  await bySalon('user_salons');
+  await em.query(`UPDATE refresh_tokens SET salon_id = NULL WHERE salon_id = $1`, [salonId]);
+  await em.query(
+    `UPDATE users u
+     SET salon_id = (SELECT us.salon_id FROM user_salons us WHERE us.user_id = u.id LIMIT 1)
+     WHERE u.salon_id = $1 AND EXISTS (SELECT 1 FROM user_salons us WHERE us.user_id = u.id)`,
+    [salonId],
+  );
   await em.query(`DELETE FROM refresh_tokens WHERE user_id IN (${userIds})`, [salonId]);
   await em.query(`DELETE FROM password_reset_tokens WHERE user_id IN (${userIds})`, [salonId]);
   await bySalon('users');

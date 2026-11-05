@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { type AppointmentSource, AppointmentStatus } from './enums.js';
+import type { ReminderJobDto } from './reminders.js';
 
 const isoInstant = z.iso.datetime({ offset: true });
 
@@ -85,4 +86,6 @@ export interface AppointmentDto {
   status: AppointmentStatus;
   source: AppointmentSource;
   note: string | null;
+  /** Present on GET /appointments/:id. */
+  reminders?: ReminderJobDto[];
 }

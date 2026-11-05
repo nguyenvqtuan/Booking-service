@@ -1,0 +1,18 @@
+{
+  "title": "Báo cáo",
+  "from": "Từ ngày",
+  "to": "Đến ngày",
+  "invalidRange": "Ngày bắt đầu phải trước ngày kết thúc.",
+  "empty": "Chưa có dữ liệu trong khoảng thời gian này.",
+  "appointments": "Tổng lịch hẹn",
+  "completed": "Hoàn thành",
+  "noShow": "Không đến",
+  "cancelled": "Đã huỷ",
+  "noShowRate": "Tỷ lệ không đến",
+  "messages": "Tin đã gửi",
+  "messageSuccessRate": "Tỷ lệ gửi thành công",
+  "rateHint": "Tỷ lệ không đến = không đến / (hoàn thành + không đến).",
+  "month": "Tháng",
+  "tableView": "Xem bảng số liệu",
+  "chart": { "title": "Kết quả lịch hẹn theo tháng" }
+}

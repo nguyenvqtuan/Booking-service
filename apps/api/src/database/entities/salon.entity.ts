@@ -31,6 +31,10 @@ export class Salon {
   @Column({ type: 'varchar', length: 64, default: DEFAULT_TIMEZONE })
   timezone: string;
 
+  /** Online bookings must verify the phone with an SMS code (BS-38). */
+  @Column({ name: 'online_booking_otp', type: 'boolean', default: false })
+  onlineBookingOtp: boolean;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

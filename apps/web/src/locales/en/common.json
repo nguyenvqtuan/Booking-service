@@ -16,7 +16,15 @@
     "appointments": "Appointments",
     "services": "Services",
     "staff": "Staff",
-    "customers": "Customers"
+    "customers": "Customers",
+    "settings": "Reminders",
+    "reports": "Reports"
   },
-  "close": "Close"
+  "close": "Close",
+  "branch": {
+    "label": "Branch",
+    "add": "+ Add branch",
+    "name": "Branch name",
+    "create": "Create branch"
+  }
 }

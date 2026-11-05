@@ -28,5 +28,7 @@
   "views": {
     "calendar": "Lịch",
     "list": "Danh sách"
-  }
+  },
+  "noShow": "Không đến",
+  "confirmNoShow": "Đánh dấu {{name}} không đến? Số lần bỏ hẹn của khách sẽ tăng thêm 1."
 }

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { type Locale, localeSchema } from './locale.js';
+import type { SalonSummary } from './salons.js';
 
 export const PASSWORD_MIN_LENGTH = 8;
 
@@ -43,6 +44,8 @@ export interface AuthUser {
   salonSlug: string;
   /** IANA timezone of the salon; all wall-clock times are shown in it. */
   salonTimezone: string;
+  /** All salons/branches of this user; the fields above describe the current one. */
+  salons: SalonSummary[];
 }
 
 /** Body of register/login/refresh responses. The refresh token travels in an httpOnly cookie. */

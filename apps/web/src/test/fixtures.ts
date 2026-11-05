@@ -1,4 +1,4 @@
-import type { AuthResponse } from '@booking/shared';
+import { type AuthResponse, SalonRole } from '@booking/shared';
 
 export const authResponse = (accessToken: string): AuthResponse => ({
   accessToken,
@@ -12,5 +12,6 @@ export const authResponse = (accessToken: string): AuthResponse => ({
     salonName: 'Tiệm Mẫu',
     salonSlug: 'tiem-mau',
     salonTimezone: 'Asia/Ho_Chi_Minh',
+    salons: [{ id: 's1', name: 'Tiệm Mẫu', slug: 'tiem-mau', role: SalonRole.Owner }],
   },
 });

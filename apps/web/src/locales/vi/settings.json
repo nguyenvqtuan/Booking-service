@@ -1,0 +1,29 @@
+{
+  "save": "Lưu cài đặt",
+  "saved": "Đã lưu. Cài đặt áp dụng cho lịch hẹn tạo hoặc sửa từ bây giờ.",
+  "offset": {
+    "days_one": "{{count}} ngày",
+    "days_other": "{{count}} ngày",
+    "hours_one": "{{count}} giờ",
+    "hours_other": "{{count}} giờ",
+    "minutes_one": "{{count}} phút",
+    "minutes_other": "{{count}} phút",
+    "hoursMinutes": "{{h}} giờ {{m}} phút"
+  },
+  "reminders": {
+    "title": "Cài đặt nhắc hẹn",
+    "description": "Hệ thống tự gửi tin nhắc qua Zalo (ZNS) cho khách trước giờ hẹn theo các mốc dưới đây.",
+    "offsets": "Gửi nhắc trước giờ hẹn",
+    "before": "Trước {{offset}}",
+    "customHours": "Giờ",
+    "customMinutes": "Phút",
+    "addCustom": "Thêm mốc",
+    "limits": "Tối đa {{max}} mốc, từ 5 phút đến 7 ngày.",
+    "none": "Chưa chọn mốc nào: khách sẽ không nhận được tin nhắc.",
+    "fallback": "Gửi SMS khi khách không nhận được tin Zalo"
+  },
+  "onlineBooking": {
+    "title": "Đặt lịch online",
+    "otp": "Yêu cầu khách xác thực SĐT bằng mã SMS (tốn phí SMS)"
+  }
+}

@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { MemoryRouter } from 'react-router';
@@ -9,11 +10,13 @@ import { AuthProvider } from './AuthProvider';
 
 const renderAt = (path: string) =>
   render(
-    <AuthProvider>
-      <MemoryRouter initialEntries={[path]}>
-        <AppRoutes />
-      </MemoryRouter>
-    </AuthProvider>,
+    <QueryClientProvider client={new QueryClient()}>
+      <AuthProvider>
+        <MemoryRouter initialEntries={[path]}>
+          <AppRoutes />
+        </MemoryRouter>
+      </AuthProvider>
+    </QueryClientProvider>,
   );
 
 describe('route guards', () => {
@@ -33,7 +36,7 @@ describe('route guards', () => {
     server.use(http.post(`${API}/auth/refresh`, () => HttpResponse.json(authResponse('t'))));
     renderAt('/');
     expect(await screen.findByRole('heading', { name: 'Tổng quan' })).toBeInTheDocument();
-    expect(screen.getByText('Tiệm Mẫu')).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Tiệm Mẫu' })).toBeInTheDocument();
   });
 
   it('sends signed-in users away from /login', async () => {

@@ -1,8 +1,10 @@
 import {
   Appointment,
+  AppointmentActionToken,
   Customer,
   MessageLog,
   PasswordResetToken,
+  ProviderToken,
   RefreshToken,
   ReminderJob,
   ReminderSetting,
@@ -11,6 +13,7 @@ import {
   Staff,
   StaffService,
   User,
+  UserSalon,
 } from './entities/index.js';
 
 /**
@@ -30,4 +33,7 @@ export const ENTITIES = [
   ReminderSetting,
   RefreshToken,
   PasswordResetToken,
+  ProviderToken,
+  AppointmentActionToken,
+  UserSalon,
 ];

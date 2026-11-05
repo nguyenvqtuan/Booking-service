@@ -228,6 +228,8 @@ a {
 .modal-backdrop {
   position: fixed;
   inset: 0;
+  /* Above FullCalendar, whose layers use z-index. */
+  z-index: 100;
   display: grid;
   place-items: center;
   padding: 16px;
@@ -528,5 +530,322 @@ a {
   }
   .fc .fc-toolbar-title {
     font-size: 1.1rem;
+  }
+}
+.settings-form {
+  max-width: 560px;
+}
+.custom-offset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.custom-offset input {
+  width: 90px;
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+}
+.form-success {
+  color: #1a7f37;
+}
+.public-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+.public-card {
+  width: 100%;
+  max-width: 480px;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 12px;
+  padding: 24px;
+  align-self: flex-start;
+}
+.public-card h1 {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+.slot-group {
+  border: 0;
+  padding: 0;
+  margin: 0 0 14px;
+}
+.slot-group legend {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 6px;
+}
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 8px;
+}
+.slot {
+  font: inherit;
+  padding: 10px 0;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.slot[aria-pressed='true'] {
+  background: #0969da;
+  border-color: #0969da;
+  color: #fff;
+}
+.booking-summary {
+  padding-left: 18px;
+}
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+}
+.otp-block {
+  margin-bottom: 14px;
+}
+.otp-block .field {
+  margin-top: 10px;
+}
+.otp-block p {
+  margin: 8px 0 0;
+  font-size: 0.875rem;
+}
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 0 0 8px;
+}
+.stat-tile {
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.stat-tile dt {
+  color: #57606a;
+  font-size: 0.8125rem;
+}
+.stat-tile dd {
+  margin: 4px 0 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.viz {
+  --series-completed: #2a78d6;
+  --series-no-show: #eb6834;
+  margin: 16px 0;
+  padding: 14px;
+  background: #fcfcfb;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+}
+.viz-title {
+  font-weight: 600;
+}
+.viz-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+  font-size: 0.8125rem;
+  color: #52514e;
+}
+.viz-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.viz-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+span.viz-completed {
+  background: var(--series-completed);
+}
+span.viz-no-show {
+  background: var(--series-no-show);
+}
+path.viz-completed {
+  fill: var(--series-completed);
+}
+path.viz-no-show {
+  fill: var(--series-no-show);
+}
+.viz-plot {
+  position: relative;
+  overflow-x: auto;
+}
+.viz-grid {
+  stroke: #eaeef2;
+  stroke-width: 1;
+}
+.viz-axis {
+  fill: #52514e;
+  font-size: 11px;
+}
+.viz-plot g[tabindex]:focus {
+  outline: none;
+}
+.viz-plot g[tabindex]:focus-visible rect {
+  stroke: #0969da;
+  stroke-width: 2;
+}
+.viz-tooltip {
+  position: absolute;
+  top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 10px;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgb(31 35 40 / 15%);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.viz-table summary {
+  cursor: pointer;
+  margin-bottom: 8px;
+  color: #0969da;
+}
+
+/* Narrow screens (BS-44) */
+.hours-shift input {
+  min-width: 0;
+}
+.modal {
+  max-height: calc(100dvh - 32px);
+}
+@media (max-width: 600px) {
+  .modal-backdrop {
+    padding: 8px;
+  }
+  .modal {
+    max-height: calc(100dvh - 16px);
+    padding: 16px;
+  }
+  /* Day on its own line so a shift can use the full width of the dialog. */
+  .hours-row {
+    grid-template-columns: 1fr;
+  }
+  .hours-shifts {
+    display: grid;
+    gap: 6px;
+  }
+  .hours-shift {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+    gap: 4px;
+  }
+  .hours-editor {
+    padding: 8px;
+  }
+  .hours-shifts > .btn-link {
+    justify-self: start;
+  }
+
+  /* Tables become one card per row; each cell shows its column name. */
+  .data-table-cards thead {
+    display: none;
+  }
+  .data-table-cards,
+  .data-table-cards tbody,
+  .data-table-cards tr,
+  .data-table-cards td {
+    display: block;
+    width: 100%;
+  }
+  .data-table-cards tr {
+    padding: 8px 0;
+    border-bottom: 1px solid #d0d7de;
+  }
+  .data-table-cards tr:last-child {
+    border-bottom: 0;
+  }
+  .data-table-cards td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 12px;
+    border: 0;
+    text-align: right;
+  }
+  .data-table-cards td[data-label]::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    max-width: 45%;
+    color: #57606a;
+    font-size: 0.8125rem;
+    text-align: left;
+  }
+  .data-table-cards td:empty {
+    display: none;
+  }
+  .data-table-cards .row-actions {
+    justify-content: flex-start;
+    white-space: normal;
+    flex-wrap: wrap;
+  }
+
+  /* Comfortable touch targets. */
+  .btn-link {
+    min-height: 40px;
+    padding: 8px 10px;
+  }
+  /* iOS zooms the page when focusing a control under 16px. */
+  .lang-switcher,
+  .field input,
+  .field select,
+  .toolbar input,
+  .toolbar select {
+    font-size: 16px;
+  }
+  .fc .fc-col-header-cell-cushion {
+    padding: 2px 0;
+    font-size: 0.6875rem;
+  }
+  .fc .fc-timegrid-slot-label-cushion {
+    font-size: 0.6875rem;
+  }
+  .fc .fc-toolbar-title {
+    font-size: 1.05rem;
+  }
+}
+.salon-switcher {
+  font: inherit;
+  font-weight: 700;
+  max-width: 45vw;
+  padding: 6px 8px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: #fff;
+}
+@media (max-width: 600px) {
+  .app-header {
+    flex-wrap: wrap;
+  }
+  .salon-switcher {
+    flex: 1 1 100%;
+    max-width: none;
+    font-size: 16px;
+  }
+  .app-header-right {
+    flex: 1 1 100%;
+    justify-content: space-between;
   }
 }

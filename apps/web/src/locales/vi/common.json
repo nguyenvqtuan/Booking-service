@@ -16,7 +16,15 @@
     "appointments": "Lịch hẹn",
     "services": "Dịch vụ",
     "staff": "Nhân viên",
-    "customers": "Khách hàng"
+    "customers": "Khách hàng",
+    "settings": "Cài đặt nhắc",
+    "reports": "Báo cáo"
   },
-  "close": "Đóng"
+  "close": "Đóng",
+  "branch": {
+    "label": "Chi nhánh",
+    "add": "+ Thêm chi nhánh",
+    "name": "Tên chi nhánh",
+    "create": "Tạo chi nhánh"
+  }
 }

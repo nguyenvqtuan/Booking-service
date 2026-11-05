@@ -232,25 +232,67 @@ describe('auth (e2e)', () => {
         .expect(200);
     });
 
-    it('treats reuse of a rotated token as theft and revokes the whole family', async () => {
+    /** Makes every revoked token of the test look rotated long ago (past the grace period). */
+    const ageRevokedTokens = () =>
+      t.dataSource.query(
+        `UPDATE refresh_tokens SET revoked_at = now() - interval '1 minute' WHERE revoked_at IS NOT NULL`,
+      );
+
+    it('treats a late reuse of a rotated token as theft and revokes the whole family', async () => {
       const { res } = await register();
       const first = refreshCookie(res);
       const second = refreshCookie(
         await http().post('/auth/refresh').set('Cookie', first).expect(200),
       );
+      await ageRevokedTokens();
       const reuse = await http().post('/auth/refresh').set('Cookie', first).expect(401);
       expect(reuse.body.code).toBe(ErrorCode.AuthInvalidRefreshToken);
       await http().post('/auth/refresh').set('Cookie', second).expect(401);
     });
 
-    it('lets only one of two concurrent refreshes with the same token succeed', async () => {
+    it('survives a lost response: a just-rotated token still works (page reload, other tab)', async () => {
+      const { res } = await register();
+      const first = refreshCookie(res);
+      const lost = await http().post('/auth/refresh').set('Cookie', first).expect(200);
+      // The browser never stored the new cookie and sends the old one again.
+      const retry = await http().post('/auth/refresh').set('Cookie', first).expect(200);
+      await http().post('/auth/refresh').set('Cookie', refreshCookie(retry)).expect(200);
+      await http().post('/auth/refresh').set('Cookie', refreshCookie(lost)).expect(200);
+    });
+
+    it('does not lose the session when two refreshes run at once', async () => {
       const { res } = await register();
       const cookie = refreshCookie(res);
       const results = await Promise.all([
         http().post('/auth/refresh').set('Cookie', cookie),
         http().post('/auth/refresh').set('Cookie', cookie),
       ]);
-      expect(results.map((r) => r.status).sort()).toEqual([200, 401]);
+      expect(results.map((r) => r.status)).toEqual([200, 200]);
+    });
+
+    it('the grace period cannot revive a session that was logged out', async () => {
+      const { res } = await register();
+      const first = refreshCookie(res);
+      const second = refreshCookie(
+        await http().post('/auth/refresh').set('Cookie', first).expect(200),
+      );
+      await http().post('/auth/logout').set('Cookie', second).expect(204);
+      await http().post('/auth/refresh').set('Cookie', first).expect(401);
+      await http().post('/auth/refresh').set('Cookie', second).expect(401);
+    });
+
+    it('the grace period cannot revive a session after a password reset', async () => {
+      const { res, email } = await register();
+      const first = refreshCookie(res);
+      await http().post('/auth/refresh').set('Cookie', first).expect(200);
+      await http().post('/auth/forgot-password').send({ email }).expect(204);
+      const message = [...t.mail.sent].reverse().find((m) => m.to === email)!;
+      const token = message.text.match(/token=([\w-]+)/)![1];
+      await http()
+        .post('/auth/reset-password')
+        .send({ token, password: 'brand-new-pass-2' })
+        .expect(204);
+      await http().post('/auth/refresh').set('Cookie', first).expect(401);
     });
 
     it('returns 401 without a cookie', async () => {

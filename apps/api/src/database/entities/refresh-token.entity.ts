@@ -16,6 +16,13 @@ export class RefreshToken {
   @Column({ name: 'user_id', type: 'uuid' })
   userId: string;
 
+  /**
+   * Implicit relation to salons.id (no FK, BS-70): the salon selected in this session (BS-42).
+   * Null means the user's home salon.
+   */
+  @Column({ name: 'salon_id', type: 'uuid', nullable: true })
+  salonId: string | null;
+
   @Column({ name: 'token_hash', type: 'char', length: 64 })
   tokenHash: string;
 

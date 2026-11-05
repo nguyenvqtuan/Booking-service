@@ -22,6 +22,8 @@
 - Multi-tenancy: every authenticated handler takes `@CurrentSalon() salonId` and filters every query
   by it (use `findOwnedOrFail` → 404 for other salons' records). Handlers that intentionally have no
   salon scope must be marked `@TenantAgnostic('<reason>')`; `test/tenancy.e2e-spec.ts` fails otherwise.
+- Salon context comes from the JWT; a user reaches several salons through `user_salons` and
+  `POST /auth/switch-salon` issues a token for another salon they belong to (BS-42).
 - API errors are `{ statusCode, code, message, fields? }` with a stable `ErrorCode` from `@booking/shared`;
   the web app shows messages based on `code`, never on `message`.
 - Times are stored in UTC (`timestamptz`) and converted with the salon timezone (default `Asia/Ho_Chi_Minh`).
