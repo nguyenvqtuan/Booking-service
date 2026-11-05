@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
@@ -11,11 +12,13 @@ import { API, server } from '../test/msw';
 
 const renderAt = (path: string) =>
   render(
-    <AuthProvider>
-      <MemoryRouter initialEntries={[path]}>
-        <AppRoutes />
-      </MemoryRouter>
-    </AuthProvider>,
+    <QueryClientProvider client={new QueryClient()}>
+      <AuthProvider>
+        <MemoryRouter initialEntries={[path]}>
+          <AppRoutes />
+        </MemoryRouter>
+      </AuthProvider>
+    </QueryClientProvider>,
   );
 
 describe('language switching', () => {

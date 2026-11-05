@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { NavLink, Outlet } from 'react-router';
 import { useAuth } from '../auth/auth-context';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { SalonSwitcher } from './SalonSwitcher';
 
 export function AppLayout() {
   const { t } = useTranslation();
@@ -9,9 +10,7 @@ export function AppLayout() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <NavLink to="/" className="app-brand">
-          {user?.salonName ?? t('appName')}
-        </NavLink>
+        <SalonSwitcher />
         <div className="app-header-right">
           <span className="app-user">{user?.fullName}</span>
           <LanguageSwitcher />

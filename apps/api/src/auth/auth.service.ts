@@ -1,9 +1,9 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectDataSource } from '@nestjs/typeorm';
 import bcrypt from 'bcryptjs';
-import { DataSource, type EntityManager, IsNull, MoreThan } from 'typeorm';
+import { DataSource, IsNull, MoreThan } from 'typeorm';
 import {
   type AccessTokenPayload,
   type AuthResponse,
@@ -13,15 +13,21 @@ import {
   type ForgotPasswordInput,
   type LoginInput,
   type RegisterInput,
-  RESERVED_SLUGS,
   type ResetPasswordInput,
+  SalonRole,
   type UpdateProfileInput,
 } from '@booking/shared';
 import { AppException } from '../common/app.exception.js';
 import { isPgError, PgErrorCode } from '../common/pg-errors.js';
-import { slugify } from '../common/slugify.js';
-import { PasswordResetToken, ReminderSetting, Salon, User } from '../database/entities/index.js';
+import {
+  PasswordResetToken,
+  ReminderSetting,
+  Salon,
+  User,
+  UserSalon,
+} from '../database/entities/index.js';
 import { MailService } from '../mail/mail.service.js';
+import { listUserSalons, uniqueSalonSlug } from '../salons/salon-helpers.js';
 import { type IssuedRefreshToken, RefreshTokenService } from './refresh-token.service.js';
 import { generateOpaqueToken, hashToken } from './token-hash.js';
 
@@ -82,7 +88,7 @@ export class AuthService {
       const salon = await em.save(
         em.create(Salon, {
           name: input.salonName,
-          slug: await this.uniqueSlug(input.salonName, em),
+          slug: await uniqueSalonSlug(input.salonName, em),
         }),
       );
       await em.insert(ReminderSetting, {
@@ -98,6 +104,7 @@ export class AuthService {
           ...(input.locale && { locale: input.locale }),
         }),
       );
+      await em.insert(UserSalon, { userId: created.id, salonId: salon.id, role: SalonRole.Owner });
       return { user: created, salon };
     });
   }
@@ -124,9 +131,9 @@ export class AuthService {
       );
     }
     const rotated = await this.refreshTokens.rotate(rawRefreshToken);
-    const user = await this.findUserWithSalon(rotated.userId);
+    const current = await this.findUserWithSalon(rotated.userId, rotated.salonId);
     return {
-      response: await this.buildResponse(user),
+      response: await this.buildResponse(current),
       refreshToken: { token: rotated.token, expiresAt: rotated.expiresAt },
     };
   }
@@ -135,13 +142,34 @@ export class AuthService {
     if (rawRefreshToken) await this.refreshTokens.revoke(rawRefreshToken);
   }
 
-  async me(userId: string): Promise<AuthUser> {
-    return this.toAuthUser(await this.findUserWithSalon(userId));
+  async me(userId: string, salonId: string): Promise<AuthUser> {
+    return this.toAuthUser(await this.findUserWithSalon(userId, salonId));
   }
 
-  async updateProfile(userId: string, input: UpdateProfileInput): Promise<AuthUser> {
+  async updateProfile(
+    userId: string,
+    salonId: string,
+    input: UpdateProfileInput,
+  ): Promise<AuthUser> {
     await this.dataSource.getRepository(User).update({ id: userId }, { locale: input.locale });
-    return this.me(userId);
+    return this.me(userId, salonId);
+  }
+
+  /**
+   * Selects another salon of the user: the new access token carries it, so every query is
+   * scoped to it through @CurrentSalon. Salons of other users look like they do not exist.
+   */
+  async switchSalon(
+    userId: string,
+    salonId: string,
+    rawRefreshToken: string | undefined,
+  ): Promise<AuthResponse> {
+    const member = await this.dataSource
+      .getRepository(UserSalon)
+      .exists({ where: { userId, salonId } });
+    if (!member) throw new NotFoundException('Salon not found');
+    if (rawRefreshToken) await this.refreshTokens.setSalon(rawRefreshToken, salonId);
+    return this.buildResponse(await this.findUserWithSalon(userId, salonId));
   }
 
   /** Always succeeds so the endpoint cannot be used to discover registered emails. */
@@ -197,47 +225,41 @@ export class AuthService {
   }
 
   private async buildResponse({ user, salon }: UserWithSalon): Promise<AuthResponse> {
-    const payload: AccessTokenPayload = { sub: user.id, salonId: user.salonId };
+    const payload: AccessTokenPayload = { sub: user.id, salonId: salon.id };
     return {
       accessToken: await this.jwt.signAsync(payload),
       expiresIn: this.config.getOrThrow<number>('JWT_ACCESS_TTL_SEC'),
-      user: this.toAuthUser({ user, salon }),
+      user: await this.toAuthUser({ user, salon }),
     };
   }
 
-  private toAuthUser({ user, salon }: UserWithSalon): AuthUser {
+  private async toAuthUser({ user, salon }: UserWithSalon): Promise<AuthUser> {
     return {
       id: user.id,
       email: user.email,
       fullName: user.fullName,
       locale: user.locale,
-      salonId: user.salonId,
+      salonId: salon.id,
       salonName: salon.name,
       salonSlug: salon.slug,
       salonTimezone: salon.timezone,
+      salons: await listUserSalons(this.dataSource.manager, user.id),
     };
   }
 
-  private async findUserWithSalon(userId: string): Promise<UserWithSalon> {
+  private async findUserWithSalon(userId: string, salonId?: string | null): Promise<UserWithSalon> {
     return this.withSalon(
       await this.dataSource.getRepository(User).findOneByOrFail({ id: userId }),
+      salonId,
     );
   }
 
-  /** Loads the user's salon through the implicit users.salon_id relation (BS-70). */
-  private async withSalon(user: User): Promise<UserWithSalon> {
-    const salon = await this.dataSource.getRepository(Salon).findOneByOrFail({ id: user.salonId });
+  /** The requested salon if the user still belongs to it, otherwise the home salon. */
+  private async withSalon(user: User, salonId?: string | null): Promise<UserWithSalon> {
+    const em = this.dataSource.manager;
+    const member = salonId && (await em.exists(UserSalon, { where: { userId: user.id, salonId } }));
+    const salon = await em.findOneByOrFail(Salon, { id: member ? salonId : user.salonId });
     return { user, salon };
-  }
-
-  /** "Tiệm A" -> "tiem-a", then "tiem-a-2", "tiem-a-3"... if taken. */
-  private async uniqueSlug(name: string, em: EntityManager): Promise<string> {
-    const base = slugify(name) || 'salon';
-    for (let n = 1; ; n++) {
-      const candidate = n === 1 ? base : `${base}-${n}`;
-      if (RESERVED_SLUGS.includes(candidate)) continue;
-      if (!(await em.exists(Salon, { where: { slug: candidate } }))) return candidate;
-    }
   }
 
   private bcryptRounds(): number {

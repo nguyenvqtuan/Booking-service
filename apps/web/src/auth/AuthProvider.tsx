@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AuthResponse, AuthUser, Locale, LoginInput, RegisterInput } from '@booking/shared';
 import i18n, { currentLocale } from '../i18n';
@@ -9,9 +10,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>('loading');
   const [user, setUser] = useState<AuthUser | null>(null);
   const userRef = useRef<AuthUser | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const unsubscribe = onSessionChange((session) => {
+      const previous = userRef.current;
+      // Never show cached data of another salon or user (BS-42).
+      if (previous && !session) queryClient.clear();
+      else if (
+        previous &&
+        session &&
+        (previous.id !== session.user.id || previous.salonId !== session.user.salonId)
+      ) {
+        void queryClient.resetQueries();
+      }
       userRef.current = session?.user ?? null;
       setUser(userRef.current);
       setStatus(session ? 'authenticated' : 'anonymous');
@@ -23,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Restore the session from the refresh cookie on page load.
     refreshSession().catch(() => setStatus('anonymous'));
     return unsubscribe;
-  }, []);
+  }, [queryClient]);
 
   const login = useCallback(async (input: LoginInput) => {
     const { data } = await api.post<AuthResponse>('/auth/login', input);

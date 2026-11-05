@@ -11,7 +11,7 @@ import {
 import { DEFAULT_LOCALE, type Locale, SUPPORTED_LOCALES } from '@booking/shared';
 import { sqlIn } from './sql-helpers.js';
 
-/** Salon owner / login user. MVP: each user belongs to one salon (multi-branch in BS-42). */
+/** Login user. Belongs to one or more salons through user_salons (BS-42). */
 @Entity('users')
 @Unique('UQ_users_email', ['email'])
 @Check('CHK_users_locale', `"locale" IN ${sqlIn(SUPPORTED_LOCALES)}`)
@@ -19,7 +19,7 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  /** Implicit relation to salons.id (no FK, BS-70). */
+  /** Implicit relation to salons.id (no FK, BS-70): the home salon, selected at sign-in. */
   @Index('IDX_users_salon_id')
   @Column({ name: 'salon_id', type: 'uuid' })
   salonId: string;

@@ -25,6 +25,8 @@ import {
   registerSchema,
   type ResetPasswordInput,
   resetPasswordSchema,
+  type SwitchSalonInput,
+  switchSalonSchema,
   type UpdateProfileInput,
   updateProfileSchema,
 } from '@booking/shared';
@@ -109,7 +111,7 @@ export class AuthController {
   @Get('me')
   @TenantAgnostic('Reads the authenticated user by id from the token')
   me(@CurrentUser() user: AccessTokenPayload): Promise<AuthUser> {
-    return this.auth.me(user.sub);
+    return this.auth.me(user.sub, user.salonId);
   }
 
   @Patch('me')
@@ -118,7 +120,18 @@ export class AuthController {
     @CurrentUser() user: AccessTokenPayload,
     @Body(new ZodValidationPipe(updateProfileSchema)) body: UpdateProfileInput,
   ): Promise<AuthUser> {
-    return this.auth.updateProfile(user.sub, body);
+    return this.auth.updateProfile(user.sub, user.salonId, body);
+  }
+
+  @Post('switch-salon')
+  @HttpCode(HttpStatus.OK)
+  @TenantAgnostic('Selects a salon; membership of the authenticated user is checked')
+  switchSalon(
+    @CurrentUser() user: AccessTokenPayload,
+    @Body(new ZodValidationPipe(switchSalonSchema)) body: SwitchSalonInput,
+    @Req() req: Request,
+  ): Promise<AuthResponse> {
+    return this.auth.switchSalon(user.sub, body.salonId, this.readCookie(req));
   }
 
   private withCookie(res: Response, result: AuthResult): AuthResponse {

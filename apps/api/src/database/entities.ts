@@ -13,6 +13,7 @@ import {
   Staff,
   StaffService,
   User,
+  UserSalon,
 } from './entities/index.js';
 
 /**
@@ -34,4 +35,5 @@ export const ENTITIES = [
   PasswordResetToken,
   ProviderToken,
   AppointmentActionToken,
+  UserSalon,
 ];

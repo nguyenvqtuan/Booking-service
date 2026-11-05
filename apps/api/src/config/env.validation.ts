@@ -17,6 +17,8 @@ export const envValidationSchema = Joi.object({
   JWT_ACCESS_SECRET: Joi.string().min(32).required(),
   JWT_ACCESS_TTL_SEC: Joi.number().integer().min(60).default(900),
   REFRESH_TOKEN_TTL_DAYS: Joi.number().integer().min(1).default(7),
+  /** A just-rotated refresh token may be presented again for this long (lost response, tabs). */
+  REFRESH_REUSE_GRACE_SEC: Joi.number().integer().min(0).default(30),
   PASSWORD_RESET_TTL_MIN: Joi.number().integer().min(5).default(30),
   BCRYPT_ROUNDS: Joi.number().integer().min(4).max(15).default(10),
   COOKIE_SECURE: Joi.boolean().truthy('true').falsy('false').default(false),
